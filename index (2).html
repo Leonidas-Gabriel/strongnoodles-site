@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strongnoodles — High-protein pasta from Zug</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF3E6;
+    --paper: #FFFDF8;
+    --ink: #241A12;
+    --ink-soft: #5A4A3A;
+    --wheat: #C99A3D;
+    --wheat-deep: #A87C24;
+    --olive: #47592E;
+    --olive-deep: #364423;
+    --rust: #A6431F;
+    --line: #E7DCC6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  img, svg { max-width: 100%; display: block; }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- NAV ---------- */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(250, 243, 230, 0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  nav.wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 76px;
+  }
+
+  .brand {
+    font-size: 1.4rem;
+    letter-spacing: 0.01em;
+  }
+  .brand span { color: var(--rust); }
+
+  .nav-links {
+    display: flex;
+    gap: 2.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-links button {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem 0.1rem;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .nav-links button:hover { color: var(--ink); }
+
+  .nav-links button.active {
+    color: var(--ink);
+    border-bottom-color: var(--rust);
+  }
+
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+  }
+  .nav-toggle span {
+    width: 24px;
+    height: 2px;
+    background: var(--ink);
+    display: block;
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section.page { display: none; }
+  section.page.active { display: block; animation: rise 0.55s ease; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    section.page.active { animation: none; }
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    margin-top: 6rem;
+    padding: 2.4rem 0;
+  }
+  footer .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+  }
+
+  /* ---------- HOME ---------- */
+  .hero {
+    padding: 5rem 0 4rem;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.4rem, 4.4vw, 3.6rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+
+  .hero p.lead {
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    max-width: 46ch;
+    margin-top: 1.4rem;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.98rem;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--rust); color: var(--paper); }
+  .btn-primary:hover { background: #8f3a1a; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+  }
+  .btn-ghost:hover { border-color: var(--ink); }
+
+  .noodle-art { width: 100%; }
+
+  .stat-strip {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 2.4rem 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  .stat {
+    flex: 1;
+    min-width: 160px;
+  }
+  .stat .num {
+    font-family: 'Fraunces', serif;
+    font-size: 2.1rem;
+    color: var(--olive-deep);
+  }
+  .stat .label {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin-top: 0.2rem;
+  }
+
+  .features {
+    padding: 5rem 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .feature {
+    padding: 0 1.8rem;
+    border-left: 1px solid var(--line);
+  }
+  .feature:first-child { border-left: none; padding-left: 0; }
+  .feature .mark {
+    width: 34px;
+    height: 6px;
+    background: var(--wheat);
+    border-radius: 3px;
+    margin-bottom: 1.2rem;
+  }
+  .feature:nth-child(2) .mark { background: var(--olive); }
+  .feature:nth-child(3) .mark { background: var(--rust); }
+  .feature h3 { font-size: 1.2rem; margin-bottom: 0.6rem; }
+  .feature p { color: var(--ink-soft); font-size: 0.97rem; }
+
+  .section-head {
+    padding: 4.5rem 0 2rem;
+  }
+  .section-head .eyebrow {
+    color: var(--rust);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+  .section-head h2 {
+    font-size: clamp(1.9rem, 3vw, 2.5rem);
+    max-width: 24ch;
+  }
+  .section-head p {
+    color: var(--ink-soft);
+    max-width: 58ch;
+    margin-top: 1rem;
+    font-size: 1.05rem;
+  }
+
+  /* ---------- TEAM ---------- */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.6rem;
+    padding-bottom: 5rem;
+  }
+  .member {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--wheat);
+    border-radius: 6px;
+    padding: 1.8rem;
+  }
+  .member:nth-child(2) { border-top-color: var(--olive); }
+  .member:nth-child(3) { border-top-color: var(--rust); }
+  .member:nth-child(4) { border-top-color: var(--olive); }
+  .member:nth-child(5) { border-top-color: var(--wheat); }
+  .member:nth-child(6) { border-top-color: var(--rust); }
+
+  .avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    color: var(--paper);
+    background: var(--olive-deep);
+    margin-bottom: 1.1rem;
+  }
+  .member:nth-child(2) .avatar { background: var(--rust); }
+  .member:nth-child(3) .avatar { background: var(--wheat-deep); }
+  .member:nth-child(4) .avatar { background: var(--olive-deep); }
+  .member:nth-child(5) .avatar { background: var(--rust); }
+  .member:nth-child(6) .avatar { background: var(--wheat-deep); }
+
+  .member h3 { font-size: 1.1rem; }
+  .member .role {
+    color: var(--rust);
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin: 0.2rem 0 0.7rem;
+  }
+  .member p.bio { color: var(--ink-soft); font-size: 0.93rem; }
+
+  .team-note {
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    padding: 1.2rem 1.4rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin-bottom: 2.4rem;
+  }
+
+  /* ---------- IDEA ---------- */
+  .idea-quote {
+    border-left: 3px solid var(--rust);
+    padding-left: 1.6rem;
+    margin: 3rem 0;
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 56ch;
+  }
+
+  .timeline {
+    padding-bottom: 5rem;
+    display: grid;
+    gap: 2.2rem;
+  }
+  .tl-item {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 1.6rem;
+  }
+  .tl-item .tl-mark {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    color: var(--wheat-deep);
+    border-right: 1px solid var(--line);
+    padding-right: 1.6rem;
+  }
+  .tl-item h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
+  .tl-item p { color: var(--ink-soft); font-size: 0.97rem; max-width: 60ch; }
+
+  /* ---------- CONTACT ---------- */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    gap: 3rem;
+    padding-bottom: 5rem;
+  }
+  .contact-grid .divider { background: var(--line); }
+
+  label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 0.4rem;
+  }
+  .field { margin-bottom: 1.3rem; }
+  input, textarea {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+    font-family: inherit;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+  input:focus, textarea:focus {
+    outline: 2px solid var(--wheat-deep);
+    outline-offset: 1px;
+  }
+  textarea { resize: vertical; min-height: 130px; }
+
+  .info-block { margin-bottom: 2rem; }
+  .info-block h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+  .info-block p, .info-block a { color: var(--ink-soft); font-size: 0.97rem; }
+  .info-block a:hover { color: var(--rust); }
+
+  .form-note {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-top: 0.8rem;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero .art { order: -1; max-width: 280px; margin: 0 auto; }
+    .features { grid-template-columns: 1fr; gap: 2.4rem; }
+    .feature { border-left: none; padding-left: 0; border-top: 1px solid var(--line); padding-top: 1.8rem; }
+    .feature:first-child { border-top: none; padding-top: 0; }
+    .team-grid { grid-template-columns: 1fr 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .contact-grid .divider { display: none; }
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    .nav-links.open {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 76px;
+      left: 0;
+      right: 0;
+      background: var(--cream);
+      border-bottom: 1px solid var(--line);
+      padding: 1rem 32px 1.6rem;
+      gap: 1rem;
+    }
+  }
+  @media (max-width: 560px) {
+    .team-grid { grid-template-columns: 1fr; }
+    .tl-item { grid-template-columns: 1fr; }
+    .tl-item .tl-mark { border-right: none; padding-right: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <div class="brand">strong<span>noodles</span></div>
+    <ul class="nav-links" id="navLinks">
+      <li><button data-page="home" class="active">Homepage</button></li>
+      <li><button data-page="team">Our Team</button></li>
+      <li><button data-page="idea">Our Idea</button></li>
+      <li><button data-page="contact">Contact Us</button></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <!-- HOME -->
+  <section class="page active" id="home">
+    <div class="hero">
+      <div>
+        <h1>Pasta that pulls its weight.</h1>
+        <p class="lead">High-protein pasta made in Zug, for people who train hard and still want dinner to taste like dinner. No chalky texture, no compromise, just real pasta with the numbers to back up your training.</p>
+        <div class="cta-row">
+          <button class="btn btn-primary" data-page="idea">See our story</button>
+          <button class="btn btn-ghost" data-page="contact">Get in touch</button>
+        </div>
+      </div>
+      <div class="art">
+        <svg class="noodle-art" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 60 C 120 20, 160 100, 240 60 S 360 20, 380 70" stroke="#C99A3D" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path d="M30 130 C 110 90, 150 170, 230 130 S 350 90, 370 140" stroke="#47592E" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path d="M50 200 C 130 160, 170 240, 250 200 S 370 160, 390 210" stroke="#A6431F" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path d="M20 270 C 100 230, 140 300, 220 260 S 340 230, 360 280" stroke="#C99A3D" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat"><div class="num">40g</div><div class="label">protein per 100g of pasta</div></div>
+      <div class="stat"><div class="num">100%</div><div class="label">made in Switzerland</div></div>
+      <div class="stat"><div class="num">5</div><div class="label">students who built it from scratch</div></div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="mark"></div>
+        <h3>Real nutrition</h3>
+        <p>Every serving is built around a serious protein number, not a marketing footnote. It fits a training day the same way a normal meal should.</p>
+      </div>
+      <div class="feature">
+        <div class="mark"></div>
+        <h3>Actually tastes like pasta</h3>
+        <p>Most protein pasta trades taste for macros. We spent months on texture and bite until it stopped tasting like a supplement and started tasting like dinner.</p>
+      </div>
+      <div class="feature">
+        <div class="mark"></div>
+        <h3>Built by people who train</h3>
+        <p>We're a team of five students from Zug who got tired of choosing between a good meal and a good macro sheet, so we made both at once.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="page" id="team">
+    <div class="section-head">
+      <div class="eyebrow">Our Team</div>
+      <h2>Five students, one kitchen, way too many test batches.</h2>
+      <p>Strongnoodles started inside the Youth Enterprise Switzerland (YES) program in Zug. Here's who's actually behind it.</p>
+    </div>
+
+    <div class="team-grid">
+      <div class="member">
+        <div class="avatar">L</div>
+        <h3>Leon Windhager</h3>
+        <div class="role">CEO</div>
+        <p class="bio">Runs the overall vision and keeps the team pointed at the same deadline.</p>
+      </div>
+      <div class="member">
+        <div class="avatar">N</div>
+        <h3>Niels Rudolf</h3>
+        <div class="role">CAO</div>
+        <p class="bio">Keeps production, sourcing, and timelines from falling apart under five people's worth of ideas.</p>
+      </div>
+      <div class="member">
+        <div class="avatar">L</div>
+        <h3>Leonidas Gabriel</h3>
+        <div class="role">CTO</div>
+        <p class="bio">Handles the technical side of the business, from the website to the systems running behind it.</p>
+      </div>
+      <div class="member">
+        <div class="avatar">N</div>
+        <h3>Nefeli Kritikou</h3>
+        <div class="role">CFO</div>
+        <p class="bio">Manages the budget, pricing, and the founding contract that holds the whole thing together.</p>
+      </div>
+      <div class="member">
+        <div class="avatar">S</div>
+        <h3>Silvan Fischer</h3>
+        <div class="role">CPO</div>
+        <p class="bio">Leads recipe testing and makes sure every batch hits both the taste bar and the protein target.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- IDEA -->
+  <section class="page" id="idea">
+    <div class="section-head">
+      <div class="eyebrow">Our Idea</div>
+      <h2>Why we started making pasta in the first place.</h2>
+    </div>
+
+    <p class="idea-quote">"We didn't want to invent a supplement. We wanted to fix a pasta."</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-mark">01</div>
+        <div>
+          <h3>The gap</h3>
+          <p>Every high-protein pasta we tried in the fitness-oriented Zug crowd we're building for had the same problem: solid macros, forgettable taste. We noticed a lot of people just went back to regular pasta and tracked around it.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-mark">02</div>
+        <div>
+          <h3>The program</h3>
+          <p>Through Youth Enterprise Switzerland (YES), five of us got the structure to actually build a company around this instead of just complaining about it: a founding contract, a real budget, and a deadline to ship something.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-mark">03</div>
+        <div>
+          <h3>The recipe</h3>
+          <p>We went through round after round of test batches, comparing texture and bite against regular pasta, not just against other protein brands, until it stopped tasting like a compromise.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-mark">04</div>
+        <div>
+          <h3>The pitch</h3>
+          <p>Strongnoodles is our answer for the 18 to 35 crowd around Zug who train seriously and are done pretending a chalky pasta is a personality trait.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="page" id="contact">
+    <div class="section-head">
+      <div class="eyebrow">Contact Us</div>
+      <h2>Got a question, a order, or a pitch? We're listening.</h2>
+    </div>
+
+    <div class="contact-grid">
+      <div>
+        <form id="contactForm">
+          <div class="field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Send message</button>
+        </form>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <div class="info-block">
+          <h3>Based in</h3>
+          <p>Zug, Switzerland</p>
+        </div>
+        <div class="info-block">
+          <h3>Email</h3>
+          <p><a href="mailto:strongnoodles.yes@gmail.com">strongnoodles.yes@gmail.com</a></p>
+        </div>
+        <div class="info-block">
+          <h3>Instagram</h3>
+          <p><a href="https://www.instagram.com/strongnoodles.yes/" target="_blank" rel="noopener">@strongnoodles.yes</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 Strongnoodles. Made in Zug.</div>
+    <div>A Youth Enterprise Switzerland (YES) project</div>
+  </div>
+</footer>
+
+<script>
+  const buttons = document.querySelectorAll('[data-page]');
+  const pages = document.querySelectorAll('.page');
+  const navLinks = document.getElementById('navLinks');
+  const navToggle = document.getElementById('navToggle');
+
+  function showPage(id) {
+    pages.forEach(p => p.classList.toggle('active', p.id === id));
+    document.querySelectorAll('.nav-links button').forEach(b => {
+      b.classList.toggle('active', b.dataset.page === id);
+    });
+    navLinks.classList.remove('open');
+    window.location.hash = id;
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => showPage(btn.dataset.page));
+  });
+
+  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+  const initial = window.location.hash.replace('#', '');
+  if (['home', 'team', 'idea', 'contact'].includes(initial)) {
+    showPage(initial);
+  }
+
+  const contactForm = document.getElementById('contactForm');
+  contactForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const message = document.getElementById('message').value;
+    const subject = encodeURIComponent(`Message from ${name} via Strongnoodles website`);
+    const body = encodeURIComponent(`${message}\n\n— ${name} (${email})`);
+    window.location.href = `mailto:strongnoodles.yes@gmail.com?subject=${subject}&body=${body}`;
+  });
+</script>
+
+</body>
+</html>
