@@ -61,7 +61,7 @@
 
 <link rel="preload" as="image" href="images/logo.webp" type="image/webp">
 <link rel="preload" as="font" type="font/woff2" href="fonts/anton-latin.woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
 <noscript><style>.page{display:block !important;margin-bottom:48px}.nav-toggle{display:none}</style></noscript>
 </head>
 <body>
@@ -78,6 +78,7 @@
       <li><button type="button" data-page="team">Unser Team</button></li>
       <li><button type="button" data-page="idea">Proteinrechner</button></li>
       <li><button type="button" data-page="order">Bestellen</button></li>
+      <li><button type="button" data-page="reviews">Bewertungen</button></li>
       <li><button type="button" data-page="contact">Kontakt</button></li>
     </ul>
     <button type="button" class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navLinks">
@@ -370,6 +371,76 @@
     </div>
   </section>
 
+  <!-- REVIEWS -->
+  <section class="page" id="reviews" tabindex="-1">
+    <div class="section-head">
+      <div class="eyebrow">Bewertungen</div>
+      <h1>Was sagst du zu Strongnoodles?</h1>
+      <p>Hast du unsere Pasta probiert? Gib uns Sterne und schreib uns in ein paar Worten, wie sie dir geschmeckt hat.</p>
+    </div>
+
+    <div class="contact-grid">
+      <div>
+        <div class="rev-summary" id="revSummary" aria-live="polite"></div>
+        <div class="rev-list" id="revList" aria-live="polite"></div>
+        <button type="button" class="btn btn-ghost rev-more" id="revMore" hidden>Mehr anzeigen</button>
+      </div>
+      <div class="divider" aria-hidden="true"></div>
+      <div>
+        <form id="reviewForm" novalidate>
+          <fieldset class="rev-stars-field">
+            <legend>Deine Bewertung</legend>
+            <div class="rev-stars-input" id="revStarsInput">
+              <input type="radio" name="revStars" id="revStar5" value="5"><label for="revStar5" title="5 Sterne"><span class="sr-only">5 Sterne</span></label>
+              <input type="radio" name="revStars" id="revStar4" value="4"><label for="revStar4" title="4 Sterne"><span class="sr-only">4 Sterne</span></label>
+              <input type="radio" name="revStars" id="revStar3" value="3"><label for="revStar3" title="3 Sterne"><span class="sr-only">3 Sterne</span></label>
+              <input type="radio" name="revStars" id="revStar2" value="2"><label for="revStar2" title="2 Sterne"><span class="sr-only">2 Sterne</span></label>
+              <input type="radio" name="revStars" id="revStar1" value="1"><label for="revStar1" title="1 Stern"><span class="sr-only">1 Stern</span></label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="revName">Name (optional)</label>
+            <input type="text" id="revName" name="revName" maxlength="40" autocomplete="nickname" placeholder="z. B. Lena">
+          </div>
+          <div class="field">
+            <label for="revComment">Kommentar</label>
+            <textarea id="revComment" name="revComment" maxlength="500" required></textarea>
+            <div class="rev-counter" id="revCounter" aria-hidden="true">0 / 500</div>
+          </div>
+          <div class="rev-hp" aria-hidden="true">
+            <label for="revWebsite">Website (nicht ausfüllen)</label>
+            <input type="text" id="revWebsite" name="revWebsite" tabindex="-1" autocomplete="off">
+          </div>
+          <p class="calc-note">Deine Bewertung ist danach öffentlich sichtbar (mit Name, falls du einen angibst). Bitte bleib freundlich. Wir löschen unpassende Einträge.</p>
+          <button type="submit" class="btn btn-primary">Bewertung abschicken</button>
+        </form>
+        <div class="form-alert" id="revAlert" role="status" aria-live="polite"></div>
+
+        <div class="rev-admin">
+          <button type="button" class="rev-admin-toggle" id="revAdminToggle" aria-expanded="false" aria-controls="revAdminBox">Admin</button>
+          <div id="revAdminBox" hidden>
+            <form id="revLoginForm" class="rev-login" novalidate>
+              <div class="field">
+                <label for="revAdminEmail">Admin-E-Mail</label>
+                <input type="email" id="revAdminEmail" autocomplete="username">
+              </div>
+              <div class="field">
+                <label for="revAdminPass">Passwort</label>
+                <input type="password" id="revAdminPass" autocomplete="current-password">
+              </div>
+              <button type="submit" class="btn btn-ghost">Anmelden</button>
+            </form>
+            <div class="rev-admin-on" id="revAdminOn" hidden>
+              <span>Admin-Modus: Du kannst Bewertungen löschen.</span>
+              <button type="button" class="btn btn-ghost" id="revLogout">Abmelden</button>
+            </div>
+            <div class="form-alert" id="revAdminAlert" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- CONTACT -->
   <section class="page" id="contact" tabindex="-1">
     <div class="section-head">
@@ -472,6 +543,9 @@
       <h2>Formular-Dienst (Formspree)</h2>
       <p>Die Formulare dieser Website werden über Formspree (Formspree, Inc., USA) verarbeitet. Beim Absenden werden die eingegebenen Daten an die Server von Formspree übermittelt, die sie per E-Mail an uns weiterleiten. Formspree kann dabei technische Daten wie deine IP-Adresse verarbeiten. Die Übermittlung erfolgt nur, wenn du ein Formular absendest.</p>
 
+      <h2>Bewertungen (Supabase)</h2>
+      <p>Wenn du eine Bewertung abschickst, werden deine Sterne, dein Kommentar, dein optional angegebener Name und das Datum bei Supabase (Supabase, Inc., USA; Server in Europa) gespeichert und auf dieser Website <strong>öffentlich angezeigt</strong>. Gib deshalb keine privaten Daten in Name oder Kommentar ein. Beim Laden und Absenden der Bewertungen wird deine IP-Adresse an Supabase übermittelt. Du kannst jederzeit die Löschung deiner Bewertung verlangen: <a href="mailto:strongnoodles.yes@gmail.com">strongnoodles.yes@gmail.com</a>.</p>
+
       <h2>4. Server-Log-Dateien</h2>
       <p>Der Provider der Seiten erhebt und speichert automatisch Informationen in sogenannten Server-Log-Dateien, die dein Browser automatisch an uns übermittelt (z.&nbsp;B. IP-Adresse, Browsertyp, Uhrzeit des Zugriffs). Diese Daten sind nicht bestimmten Personen zuordenbar.</p>
 
@@ -526,7 +600,7 @@
   <span>Pasta-Clicker</span><span class="clicker-count" id="clickerCount" aria-hidden="true">0</span>
 </button>
 
-<script src="app.js?v=2" defer></script>
+<script src="app.js?v=3" defer></script>
 
 </body>
 </html>

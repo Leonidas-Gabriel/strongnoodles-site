@@ -5,12 +5,13 @@
   const mainEl = document.getElementById('main');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  const validPages = ['home', 'team', 'idea', 'order', 'contact', 'impressum', 'privacy', 'accessibility'];
+  const validPages = ['home', 'team', 'idea', 'order', 'reviews', 'contact', 'impressum', 'privacy', 'accessibility'];
   const pageTitles = {
     home: 'Strongnoodles – High-Protein Pasta aus Zug',
     team: 'Unser Team – Strongnoodles',
     idea: 'Proteinrechner – Strongnoodles',
     order: 'Bestellen – Strongnoodles',
+    reviews: 'Bewertungen – Strongnoodles',
     contact: 'Kontakt – Strongnoodles',
     impressum: 'Impressum – Strongnoodles',
     privacy: 'Datenschutzerklärung – Strongnoodles',
@@ -48,6 +49,7 @@
 
     document.title = pageTitles[id];
     if (id === 'home') { runCounters(); }
+    document.dispatchEvent(new CustomEvent('pageshown', { detail: id }));
     window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 
     if (moveFocus) {
@@ -297,6 +299,249 @@
       okText: 'Danke für deine Bestellung! Wir melden uns mit den Lieferdetails und den TWINT-Infos.'
     }).then(() => { updateTotal(); });
   });
+
+  // ---------- Bewertungen (Supabase) ----------
+  // Einrichtung: siehe SETUP-BEWERTUNGEN.md. Der anon-Key ist öffentlich gedacht, den Schutz übernehmen die
+  // Zeilen-Regeln (RLS) in der Datenbank. Den "service_role"-Key NIEMALS hier eintragen.
+  const SUPABASE_URL = '';       // z. B. https://abcdxyz.supabase.co
+  const SUPABASE_ANON_KEY = '';  // "anon public" Key
+  const REVIEWS_PAGE_SIZE = 10;
+
+  const revSummary = document.getElementById('revSummary');
+  const revList = document.getElementById('revList');
+  const revMore = document.getElementById('revMore');
+  const revForm = document.getElementById('reviewForm');
+  const revAlert = document.getElementById('revAlert');
+  const revComment = document.getElementById('revComment');
+  const revCounter = document.getElementById('revCounter');
+  const revAdminToggle = document.getElementById('revAdminToggle');
+  const revAdminBox = document.getElementById('revAdminBox');
+  const revLoginForm = document.getElementById('revLoginForm');
+  const revAdminOn = document.getElementById('revAdminOn');
+  const revAdminAlert = document.getElementById('revAdminAlert');
+
+  const reviewsConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+  let allReviews = [];
+  let shownCount = REVIEWS_PAGE_SIZE;
+  let reviewsLoaded = false;
+  let adminToken = null;
+
+  try {
+    const saved = JSON.parse(sessionStorage.getItem('revAdmin') || 'null');
+    if (saved && saved.token && saved.exp > Date.now()) { adminToken = saved.token; }
+  } catch (err) { adminToken = null; }
+
+  function sbHeaders(extra) {
+    return Object.assign({
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + (adminToken || SUPABASE_ANON_KEY),
+      'Content-Type': 'application/json'
+    }, extra || {});
+  }
+
+  function starsEl(n) {
+    const s = document.createElement('span');
+    s.className = 'rev-stars';
+    s.setAttribute('role', 'img');
+    s.setAttribute('aria-label', `${n} von 5 Sternen`);
+    for (let i = 1; i <= 5; i++) {
+      const star = document.createElement('span');
+      star.textContent = '★';
+      if (i > n) { star.className = 'off'; }
+      s.appendChild(star);
+    }
+    return s;
+  }
+
+  function renderSummary() {
+    revSummary.replaceChildren();
+    if (!allReviews.length) { revSummary.style.display = 'none'; return; }
+    revSummary.style.display = '';
+    const avg = allReviews.reduce((sum, r) => sum + r.stars, 0) / allReviews.length;
+    const big = document.createElement('div');
+    big.className = 'rev-avg';
+    big.textContent = avg.toFixed(1).replace('.', ',');
+    const text = document.createElement('div');
+    text.className = 'rev-summary-text';
+    text.textContent = `von 5 · ${allReviews.length} Bewertung${allReviews.length === 1 ? '' : 'en'}`;
+    revSummary.append(big, starsEl(Math.round(avg)), text);
+  }
+
+  function renderReviews() {
+    revList.replaceChildren();
+    if (!allReviews.length) {
+      const p = document.createElement('p');
+      p.className = 'rev-empty';
+      p.textContent = 'Noch keine Bewertungen. Sei die erste Person!';
+      revList.appendChild(p);
+      revMore.hidden = true;
+      return;
+    }
+    allReviews.slice(0, shownCount).forEach((r) => {
+      const item = document.createElement('article');
+      item.className = 'rev-item';
+      const head = document.createElement('div');
+      head.className = 'rev-head';
+      const name = document.createElement('span');
+      name.className = 'rev-name';
+      name.textContent = r.name || 'Anonym';
+      const date = document.createElement('span');
+      date.className = 'rev-date';
+      date.textContent = new Date(r.created_at).toLocaleDateString('de-CH');
+      head.append(name, starsEl(r.stars), date);
+      const comment = document.createElement('p');
+      comment.className = 'rev-comment';
+      comment.textContent = r.comment;
+      item.append(head, comment);
+      if (adminToken) {
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'rev-delete';
+        del.textContent = 'Löschen';
+        del.addEventListener('click', () => deleteReview(r.id));
+        item.appendChild(del);
+      }
+      revList.appendChild(item);
+    });
+    revMore.hidden = allReviews.length <= shownCount;
+  }
+
+  function renderAdminState() {
+    revLoginForm.hidden = Boolean(adminToken);
+    revAdminOn.hidden = !adminToken;
+    revAdminToggle.textContent = adminToken ? 'Admin (angemeldet)' : 'Admin';
+  }
+
+  async function loadReviews() {
+    if (!reviewsConfigured) {
+      revSummary.style.display = 'none';
+      const p = document.createElement('p');
+      p.className = 'rev-note';
+      p.textContent = 'Die Bewertungen sind bald verfügbar.';
+      revList.replaceChildren(p);
+      revForm.querySelectorAll('input, textarea, button').forEach((el) => { el.disabled = true; });
+      return;
+    }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/reviews?select=id,created_at,name,stars,comment&order=created_at.desc&limit=200`, { headers: sbHeaders() });
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      allReviews = await res.json();
+      reviewsLoaded = true;
+      renderSummary();
+      renderReviews();
+    } catch (err) {
+      const p = document.createElement('p');
+      p.className = 'rev-note';
+      p.textContent = 'Die Bewertungen konnten gerade nicht geladen werden. Bitte versuch es später nochmals.';
+      revList.replaceChildren(p);
+    }
+  }
+
+  async function deleteReview(id) {
+    if (!window.confirm('Diese Bewertung wirklich löschen?')) { return; }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/reviews?id=eq.${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: sbHeaders({ Prefer: 'return=representation' })
+      });
+      if (res.status === 401 || res.status === 403) { adminLogout(); showAlert(revAdminAlert, 'Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.', true); return; }
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      const deleted = await res.json();
+      if (!deleted.length) { throw new Error('nichts gelöscht'); }
+      allReviews = allReviews.filter((r) => r.id !== id);
+      renderSummary();
+      renderReviews();
+    } catch (err) {
+      window.alert('Das Löschen hat nicht geklappt.');
+    }
+  }
+
+  function adminLogout() {
+    adminToken = null;
+    try { sessionStorage.removeItem('revAdmin'); } catch (err) { /* ignorieren */ }
+    renderAdminState();
+    if (reviewsLoaded) { renderReviews(); }
+  }
+
+  revAdminToggle.addEventListener('click', () => {
+    const open = revAdminBox.hidden;
+    revAdminBox.hidden = !open;
+    revAdminToggle.setAttribute('aria-expanded', String(open));
+    if (open && !adminToken) { document.getElementById('revAdminEmail').focus(); }
+  });
+
+  revLoginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!reviewsConfigured) { showAlert(revAdminAlert, 'Die Bewertungen sind noch nicht eingerichtet.', true); return; }
+    const email = document.getElementById('revAdminEmail').value.trim();
+    const password = document.getElementById('revAdminPass').value;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) { throw new Error('login'); }
+      const data = await res.json();
+      adminToken = data.access_token;
+      try { sessionStorage.setItem('revAdmin', JSON.stringify({ token: adminToken, exp: Date.now() + (data.expires_in - 60) * 1000 })); } catch (err) { /* ignorieren */ }
+      document.getElementById('revAdminPass').value = '';
+      revAdminAlert.style.display = 'none';
+      renderAdminState();
+      renderReviews();
+    } catch (err) {
+      showAlert(revAdminAlert, 'Anmeldung fehlgeschlagen. Prüfe E-Mail und Passwort.', true);
+    }
+  });
+
+  document.getElementById('revLogout').addEventListener('click', adminLogout);
+  revMore.addEventListener('click', () => { shownCount += REVIEWS_PAGE_SIZE; renderReviews(); });
+
+  revComment.addEventListener('input', () => { revCounter.textContent = `${revComment.value.length} / 500`; });
+
+  revForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (document.getElementById('revWebsite').value) { return; } // Honeypot: Bots füllen das Feld aus
+    const starsInput = revForm.querySelector('input[name=revStars]:checked');
+    const comment = revComment.value.trim();
+    const name = document.getElementById('revName').value.trim();
+    if (!starsInput) { showAlert(revAlert, 'Bitte wähle zuerst Sterne aus.', true); return; }
+    if (!comment) { showAlert(revAlert, 'Bitte schreib einen kurzen Kommentar.', true); revComment.focus(); return; }
+
+    // einfache Bremse gegen Mehrfach-Klicks (kein echter Spam-Schutz, der liegt in der Datenbank)
+    try {
+      const last = parseInt(localStorage.getItem('revLastSent'), 10) || 0;
+      if (Date.now() - last < 60000) { showAlert(revAlert, 'Bitte warte kurz, bevor du eine weitere Bewertung abschickst.', true); return; }
+    } catch (err) { /* ignorieren */ }
+
+    const btn = revForm.querySelector('button[type=submit]');
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
+        method: 'POST',
+        headers: sbHeaders({ Prefer: 'return=minimal' }),
+        body: JSON.stringify({ stars: parseInt(starsInput.value, 10), name: name || null, comment })
+      });
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      try { localStorage.setItem('revLastSent', String(Date.now())); } catch (err) { /* ignorieren */ }
+      revForm.reset();
+      revCounter.textContent = '0 / 500';
+      showAlert(revAlert, 'Danke für deine Bewertung!', false);
+      const r = btn.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top);
+      await loadReviews();
+    } catch (err) {
+      showAlert(revAlert, 'Das Senden hat leider nicht geklappt. Bitte versuch es später nochmals.', true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.addEventListener('pageshown', (e) => {
+    if (e.detail === 'reviews' && !reviewsLoaded) { loadReviews(); }
+  });
+  renderAdminState();
+  if (window.location.hash === '#reviews') { loadReviews(); }
 
   // ---------- Pasta-Clicker ----------
   const clickerBtn = document.getElementById('clickerBtn');

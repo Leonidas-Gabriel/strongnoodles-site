@@ -980,3 +980,69 @@
     .team-grid { grid-template-columns: 1fr; }
     .section-head h1 { font-size: 2rem; }
   }
+
+  /* ---------- BEWERTUNGEN ---------- */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+
+  fieldset.rev-stars-field { border: 0; padding: 0; margin: 0 0 1.3rem; min-width: 0; }
+  .rev-stars-field legend { font-size: 0.88rem; font-weight: 800; padding: 0; margin-bottom: 0.4rem; }
+
+  /* Sterne-Auswahl: Radios in umgekehrter Reihenfolge, damit "davor liegende" Sterne mitleuchten */
+  .rev-stars-input { display: inline-flex; flex-direction: row-reverse; gap: 0.15rem; }
+  .rev-stars-input input {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    opacity: 0; overflow: hidden; border: 0;
+  }
+  .rev-stars-input label {
+    margin: 0; cursor: pointer; font-size: 2.4rem; line-height: 1;
+    color: var(--line); -webkit-text-stroke: 2px var(--ink);
+    transition: transform 0.1s, color 0.1s;
+  }
+  .rev-stars-input label::before { content: '\2605'; }
+  .rev-stars-input input:checked ~ label,
+  .rev-stars-input label:hover,
+  .rev-stars-input label:hover ~ label { color: var(--durum); }
+  .rev-stars-input label:hover { transform: scale(1.12); }
+  .rev-stars-input input:focus-visible + label { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+  .rev-counter { text-align: right; font-size: 0.78rem; color: var(--ink-soft); margin-top: 0.3rem; }
+  .rev-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  .rev-summary {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    padding: 1.1rem 1.3rem; margin-bottom: 1.4rem;
+    background: var(--paper); border: 2.5px solid var(--ink); box-shadow: 5px 5px 0 var(--durum);
+  }
+  .rev-avg { font-family: var(--display); font-style: italic; font-size: 2.6rem; line-height: 1; }
+  .rev-summary-text { font-size: 0.92rem; color: var(--ink-soft); }
+  .rev-stars { color: var(--durum); -webkit-text-stroke: 1px var(--ink); font-size: 1.25rem; letter-spacing: 0.05em; white-space: nowrap; }
+  .rev-stars .off { color: var(--line); }
+
+  .rev-list { display: grid; gap: 1rem; }
+  .rev-item {
+    padding: 1rem 1.2rem; background: var(--paper);
+    border: 2.5px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+  }
+  .rev-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+  .rev-name { font-weight: 800; }
+  .rev-date { font-size: 0.8rem; color: var(--ink-soft); }
+  .rev-comment { margin: 0.4rem 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .rev-empty, .rev-note { color: var(--ink-soft); margin: 0; }
+  .rev-delete {
+    margin-top: 0.8rem; padding: 0.35rem 0.8rem; font: inherit; font-size: 0.82rem; font-weight: 800;
+    background: var(--tomato); color: #fff; border: 2.5px solid var(--ink); cursor: pointer;
+  }
+  .rev-delete:hover { background: var(--tomato-deep); }
+  .rev-more { margin-top: 1.2rem; }
+
+  .rev-admin { margin-top: 2.5rem; padding-top: 1rem; border-top: 2px solid var(--line); }
+  .rev-admin-toggle {
+    background: none; border: none; padding: 0; font: inherit; font-size: 0.8rem;
+    color: var(--ink-soft); text-decoration: underline; cursor: pointer;
+  }
+  .rev-login { margin-top: 1rem; }
+  .rev-admin-on { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; font-weight: 800; }
+  #revAdminBox[hidden], .rev-admin-on[hidden], .rev-more[hidden] { display: none; }
