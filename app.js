@@ -1,3 +1,23 @@
+  // ---------- Dunkelmodus ----------
+  // Startet immer im Hellmodus, ausser die Person hat den Umschalter selbst schon einmal benutzt
+  // (die Wahl wird in localStorage gemerkt; das kleine Inline-Skript im <head> wendet sie sofort an,
+  // damit die Seite nicht erst hell aufblitzt).
+  const themeToggle = document.getElementById('themeToggle');
+  const THEME_KEY = 'snTheme';
+  function syncThemeButton() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeToggle.setAttribute('aria-pressed', String(isDark));
+    themeToggle.setAttribute('aria-label', isDark ? 'Hellmodus aktivieren' : 'Dunkelmodus aktivieren');
+  }
+  syncThemeButton();
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) { document.documentElement.removeAttribute('data-theme'); }
+    else { document.documentElement.setAttribute('data-theme', 'dark'); }
+    try { localStorage.setItem(THEME_KEY, isDark ? 'light' : 'dark'); } catch (err) { /* ignorieren */ }
+    syncThemeButton();
+  });
+
   const buttons = document.querySelectorAll('[data-page]');
   const pages = document.querySelectorAll('.page');
   const navLinks = document.getElementById('navLinks');

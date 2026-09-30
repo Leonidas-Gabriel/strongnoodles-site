@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>(function(){try{if(localStorage.getItem('snTheme')==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <title>Strongnoodles – High-Protein Pasta aus Zug</title>
 <meta name="description" content="High-Protein Pasta, in der Zentralschweiz hergestellt. 37 g Protein pro 100 g mit echtem Pasta-Geschmack. Ein YES-Projekt von fünf Schüler:innen.">
 <meta name="theme-color" content="#141414">
@@ -61,7 +62,7 @@
 
 <link rel="preload" as="image" href="images/logo.webp" type="image/webp">
 <link rel="preload" as="font" type="font/woff2" href="fonts/anton-latin.woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 <noscript><style>.page{display:block !important;margin-bottom:48px}.nav-toggle{display:none}</style></noscript>
 </head>
 <body>
@@ -73,17 +74,23 @@
 <header>
   <nav class="wrap" aria-label="Hauptnavigation">
     <button type="button" class="brand" data-page="home" aria-label="Strongnoodles, zur Startseite">strong<span>noodles</span></button>
-    <ul class="nav-links" id="navLinks">
-      <li><button type="button" data-page="home" class="active" aria-current="page">Startseite</button></li>
-      <li><button type="button" data-page="team">Unser Team</button></li>
-      <li><button type="button" data-page="idea">Proteinrechner</button></li>
-      <li><button type="button" data-page="order">Bestellen</button></li>
-      <li><button type="button" data-page="reviews">Bewertungen</button></li>
-      <li><button type="button" data-page="contact">Kontakt</button></li>
-    </ul>
-    <button type="button" class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navLinks">
-      <span></span><span></span><span></span>
-    </button>
+    <div class="nav-right">
+      <ul class="nav-links" id="navLinks">
+        <li><button type="button" data-page="home" class="active" aria-current="page">Startseite</button></li>
+        <li><button type="button" data-page="team">Unser Team</button></li>
+        <li><button type="button" data-page="idea">Proteinrechner</button></li>
+        <li><button type="button" data-page="order">Bestellen</button></li>
+        <li><button type="button" data-page="reviews">Bewertungen</button></li>
+        <li><button type="button" data-page="contact">Kontakt</button></li>
+      </ul>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Dunkelmodus aktivieren">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7M18.4 18.4l-1.7-1.7M7.3 7.3 5.6 5.6"/></g></svg>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>
+      </button>
+      <button type="button" class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </nav>
 </header>
 
@@ -604,7 +611,7 @@
   <span class="clicker-label">Pasta-Clicker</span><span class="clicker-count" id="clickerCount" aria-hidden="true">0</span>
 </button>
 
-<script src="app.js?v=8" defer></script>
+<script src="app.js?v=9" defer></script>
 
 </body>
 </html>
