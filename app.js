@@ -126,7 +126,8 @@
       const res = await fetch(FORM_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ _subject: subject, ...fields })
+        // _gotcha = Honeypot gegen Spam-Bots (Formspree verwirft Einsendungen, bei denen das Feld gefüllt ist)
+        body: JSON.stringify({ _subject: subject, _gotcha: '', ...fields })
       });
       if (!res.ok) { throw new Error('HTTP ' + res.status); }
       showAlert(alertEl, okText, false);
