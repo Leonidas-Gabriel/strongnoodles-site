@@ -61,7 +61,7 @@
 
 <link rel="preload" as="image" href="images/logo.webp" type="image/webp">
 <link rel="preload" as="font" type="font/woff2" href="fonts/anton-latin.woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=7">
+<link rel="stylesheet" href="styles.css?v=8">
 <noscript><style>.page{display:block !important;margin-bottom:48px}.nav-toggle{display:none}</style></noscript>
 </head>
 <body>
@@ -294,7 +294,7 @@
     <div class="section-head">
       <div class="eyebrow">Bestellen</div>
       <h1>Hol dir deine Strongnoodles.</h1>
-      <p>Wähl deine Menge, gib deine Adresse an und schick die Bestellung ab. Eine Packung kostet <span data-price>CHF&nbsp;7.95</span>, dazu kommen <span data-shipping>CHF&nbsp;9.00</span> Lieferkosten pro Bestellung. Bezahlt wird per <span data-payment>TWINT</span>. Nach deiner Bestellung melden wir uns mit den Lieferdetails.</p>
+      <p>Wähl deine Menge, gib deine Adresse an und schick die Bestellung ab. Eine Packung kostet <span data-price>CHF&nbsp;7.95</span>. Die Lieferkosten <span data-shipping>werden später festgelegt</span> und bei den Zahlungsinfos mitgeteilt. Bezahlt wird per <span data-payment>TWINT</span>. Nach deiner Bestellung melden wir uns mit den Lieferdetails.</p>
     </div>
 
     <div class="contact-grid">
@@ -332,11 +332,11 @@
           </div>
           <div class="order-total" aria-live="polite">
             <div><span>Preis pro Packung</span><span data-price>CHF 7.95</span></div>
-            <div><span>Zwischensumme</span><span id="orderSubtotal">CHF 7.95</span></div>
-            <div><span>Lieferkosten</span><span id="orderShipping" data-shipping>CHF 9.00</span></div>
+            <div><span>Lieferkosten</span><span id="orderShipping" data-shipping>wird später festgelegt</span></div>
             <div><span>Zahlungsmethode</span><span data-payment>TWINT</span></div>
-            <div class="total-line"><span>Total</span><span id="orderTotal">CHF 16.95</span></div>
+            <div class="total-line"><span>Zwischensumme (ohne Lieferkosten)</span><span id="orderTotal">CHF 7.95</span></div>
           </div>
+          <p class="calc-note">Die Lieferkosten sind hier noch nicht eingerechnet und werden dir separat mitgeteilt.</p>
           <div class="field">
             <label for="orderNote">Bemerkung (optional)</label>
             <textarea id="orderNote" name="orderNote"></textarea>
@@ -353,7 +353,7 @@
         </div>
         <div class="info-block">
           <h2>Preis</h2>
-          <p><span data-price>CHF&nbsp;7.95</span> pro Packung<br>+ <span data-shipping>CHF&nbsp;9.00</span> Lieferkosten pro Bestellung</p>
+          <p><span data-price>CHF&nbsp;7.95</span> pro Packung<br>Lieferkosten: <span data-shipping>wird später festgelegt</span></p>
         </div>
         <div class="info-block">
           <h2>Zahlung</h2>
@@ -604,7 +604,7 @@
   <span class="clicker-label">Pasta-Clicker</span><span class="clicker-count" id="clickerCount" aria-hidden="true">0</span>
 </button>
 
-<script src="app.js?v=7" defer></script>
+<script src="app.js?v=8" defer></script>
 
 </body>
 </html>

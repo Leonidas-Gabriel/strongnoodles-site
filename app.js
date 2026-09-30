@@ -243,25 +243,22 @@
 
   // Einzige Quelle für Preise: alle Stellen mit data-price / data-shipping / data-payment werden daraus befüllt.
   const PRICE_CENTS = 795; // CHF 7.95 pro Packung
-  const SHIPPING_CENTS = 900; // CHF 9.00 Lieferkosten pro Bestellung
+  const SHIPPING_TEXT = 'wird später festgelegt'; // Lieferkosten stehen noch nicht fest
   const PAYMENT_METHOD = 'TWINT';
   const orderTotal = document.getElementById('orderTotal');
-  const orderSubtotal = document.getElementById('orderSubtotal');
   const formatChf = (cents) => 'CHF ' + (cents / 100).toFixed(2);
 
   document.querySelectorAll('[data-price]').forEach((el) => { el.textContent = formatChf(PRICE_CENTS).replace(' ', ' '); });
-  document.querySelectorAll('[data-shipping]').forEach((el) => { el.textContent = formatChf(SHIPPING_CENTS).replace(' ', ' '); });
+  document.querySelectorAll('[data-shipping]').forEach((el) => { el.textContent = SHIPPING_TEXT; });
   document.querySelectorAll('[data-payment]').forEach((el) => { el.textContent = PAYMENT_METHOD; });
-  orderSubtotal.textContent = formatChf(PRICE_CENTS);
-  orderTotal.textContent = formatChf(PRICE_CENTS + SHIPPING_CENTS);
+  orderTotal.textContent = formatChf(PRICE_CENTS);
 
   function currentQty() {
     return Math.min(99, Math.max(1, parseInt(orderQty.value, 10) || 1));
   }
   function updateTotal() {
     const subtotal = currentQty() * PRICE_CENTS;
-    orderSubtotal.textContent = formatChf(subtotal);
-    orderTotal.textContent = formatChf(subtotal + SHIPPING_CENTS);
+    orderTotal.textContent = formatChf(subtotal);
     orderTotal.classList.remove('bump'); void orderTotal.offsetWidth; orderTotal.classList.add('bump');
   }
   function changeQty(delta) {
@@ -288,9 +285,8 @@
       subject: `Bestellung von ${val('orderName')} (${packs})`,
       fields: {
         Menge: packs,
-        Preis: `${formatChf(PRICE_CENTS)} pro Packung, Zwischensumme ${formatChf(qty * PRICE_CENTS)}`,
-        Lieferkosten: formatChf(SHIPPING_CENTS),
-        Total: formatChf(qty * PRICE_CENTS + SHIPPING_CENTS),
+        Preis: `${formatChf(PRICE_CENTS)} pro Packung, Zwischensumme ${formatChf(qty * PRICE_CENTS)} (ohne Lieferkosten)`,
+        Lieferkosten: SHIPPING_TEXT,
         Zahlungsmethode: PAYMENT_METHOD,
         Lieferadresse: `${val('orderName')}, ${val('orderStreet')}, ${val('orderZip')} ${val('orderCity')}`,
         'E-Mail': val('orderEmail'),
