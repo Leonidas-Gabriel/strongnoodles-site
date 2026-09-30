@@ -303,8 +303,8 @@
   // ---------- Bewertungen (Supabase) ----------
   // Einrichtung: siehe SETUP-BEWERTUNGEN.md. Der anon-Key ist öffentlich gedacht, den Schutz übernehmen die
   // Zeilen-Regeln (RLS) in der Datenbank. Den "service_role"-Key NIEMALS hier eintragen.
-  const SUPABASE_URL = '';       // z. B. https://abcdxyz.supabase.co
-  const SUPABASE_ANON_KEY = '';  // "anon public" Key
+  const SUPABASE_URL = 'https://kvtiggpqamlwiylfnhag.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2dGlnZ3BxYW1sd2l5bGZuaGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTQzMTYsImV4cCI6MjEwNjMzMDMxNn0.-452RJEbb_Jpf2HBEbdj7HbR3DsICpEi6q4JhKDfFxU';  // "anon public" Key
   const REVIEWS_PAGE_SIZE = 10;
 
   const revSummary = document.getElementById('revSummary');
