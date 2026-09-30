@@ -92,7 +92,7 @@
   const CONTACT_EMAIL = 'strongnoodles.yes@gmail.com';
   // Sobald hier die URL eines Formular-Dienstes steht (z. B. Formspree oder Web3Forms),
   // werden Bestellungen und Nachrichten direkt versendet. Leer = Fallback über das E-Mail-Programm.
-  const FORM_ENDPOINT = '';
+  const FORM_ENDPOINT = 'https://formspree.io/f/xkjgyyen';
 
   function showAlert(el, text, isError) {
     el.textContent = text;
