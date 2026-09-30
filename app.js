@@ -237,7 +237,7 @@
     calcResult.innerHTML = `
       <div class="calc-result-content">
         <div class="calc-big">${pastaGrams.toFixed(0)}&nbsp;g</div>
-        <p class="calc-sub">Strongnoodles (trocken) pro Tag, um deinen Proteinbedarf über die Pasta zu decken.</p>
+        <p class="calc-sub">Strongnoodles (trocken) pro Tag, um deinen Proteinbedarf mit der Pasta zu decken.</p>
         <div class="calc-detail"><span>Alter</span><span>${age} Jahre</span></div>
         <div class="calc-detail"><span>Geschlecht</span><span>${gender === 'male' ? 'Männlich' : 'Weiblich'}</span></div>
         <div class="calc-detail"><span>Grösse / Gewicht</span><span>${height} cm / ${weight} kg</span></div>
@@ -263,7 +263,7 @@
 
   // Einzige Quelle für Preise: alle Stellen mit data-price / data-shipping / data-payment werden daraus befüllt.
   const PRICE_CENTS = 795; // CHF 7.95 pro Packung
-  const SHIPPING_TEXT = 'wird später festgelegt'; // Lieferkosten stehen noch nicht fest
+  const SHIPPING_TEXT = 'werden später festgelegt'; // Lieferkosten (Plural) stehen noch nicht fest
   const PAYMENT_METHOD = 'TWINT';
   const orderTotal = document.getElementById('orderTotal');
   const formatChf = (cents) => 'CHF ' + (cents / 100).toFixed(2);
