@@ -61,7 +61,7 @@
 
 <link rel="preload" as="image" href="images/logo.webp" type="image/webp">
 <link rel="preload" as="font" type="font/woff2" href="fonts/anton-latin.woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 <noscript><style>.page{display:block !important;margin-bottom:48px}.nav-toggle{display:none}</style></noscript>
 </head>
 <body>
@@ -568,12 +568,21 @@
       <p>Strongnoodles setzt sich dafür ein, dass die Website für alle Menschen zugänglich ist, unabhängig von ihren körperlichen oder technischen Möglichkeiten.</p>
 
       <h2>Stand der Vereinbarkeit</h2>
-      <p>Diese Website orientiert sich an den Richtlinien der Web Content Accessibility Guidelines (WCAG 2.1, Level AA). Folgende Massnahmen wurden umgesetzt:</p>
+      <p>Diese Website orientiert sich an den Richtlinien der Web Content Accessibility Guidelines (WCAG 2.1, Level AA) und ist <strong>teilweise konform</strong>: Die meisten Anforderungen sind umgesetzt, einzelne Punkte (siehe unten) noch nicht vollständig. Folgende Massnahmen wurden umgesetzt:</p>
       <ul>
         <li>Skalierbare Schriftgrössen und klare Kontraste nach WCAG-Standards.</li>
         <li>Tastaturnavigation mit sichtbarer Fokusmarkierung für interaktive Elemente und Formulare.</li>
+        <li>Ein Skip-Link, um direkt zum Hauptinhalt zu springen.</li>
         <li>Alternativtexte für aussagekräftige Grafiken.</li>
         <li>Semantisches HTML5 zur Unterstützung von Screenreadern.</li>
+        <li>Berücksichtigung von reduzierten Bewegungseinstellungen (<code>prefers-reduced-motion</code>) bei Animationen.</li>
+        <li>Die Website funktioniert auch ohne JavaScript mit einem Hinweistext und allen Inhalten sichtbar.</li>
+      </ul>
+
+      <h2>Bekannte Einschränkungen</h2>
+      <p>Folgende Punkte entsprechen noch nicht vollständig den WCAG 2.1 AA-Kriterien. Wir arbeiten daran:</p>
+      <ul>
+        <li><strong>Werbevideo ohne Untertitel:</strong> Das Video auf der Startseite hat noch keine Untertitel bzw. kein Transkript für den Ton. Das betrifft WCAG-Kriterium 1.2.2 (Untertitel bei aufgezeichneten Medien).</li>
       </ul>
 
       <h2>Feedback und Kontakt</h2>
@@ -600,7 +609,7 @@
   <span class="clicker-label">Pasta-Clicker</span><span class="clicker-count" id="clickerCount" aria-hidden="true">0</span>
 </button>
 
-<script src="app.js?v=5" defer></script>
+<script src="app.js?v=6" defer></script>
 
 </body>
 </html>
