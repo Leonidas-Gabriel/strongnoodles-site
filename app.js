@@ -1,5 +1,5 @@
   // ---------- Sprachen ----------
-  // Der deutsche Text im HTML ist die Quelle. Übersetzungen liegen in i18n/<code>.json als
+  // Der deutsche Text im HTML ist die Quelle. Übersetzungen liegen in i18n/<code>.js als
   // { "deutscher Text": "Übersetzung" } und werden mit tools/translate.mjs über DeepL erzeugt.
   // Fehlt ein Eintrag, bleibt einfach der deutsche Text stehen.
   // Nie übersetzen: translate="no". Von JS selbst gepflegte Texte: data-i18n-skip.
@@ -40,15 +40,24 @@
   const langSelect = document.getElementById('langSelect');
   const langCode = document.getElementById('langCode');
 
+  // Als <script> laden statt per fetch: funktioniert so auch, wenn index.html direkt aus dem Ordner geöffnet wird
+  function loadDict(lang) {
+    return new Promise((resolve, reject) => {
+      const ready = () => window.SN_I18N && window.SN_I18N[lang];
+      if (ready()) { resolve(ready()); return; }
+      const s = document.createElement('script');
+      s.src = `i18n/${lang}.js?v=${I18N_VERSION}`;
+      s.onload = () => (ready() ? resolve(ready()) : reject(new Error('leer')));
+      s.onerror = () => reject(new Error('nicht gefunden'));
+      document.head.appendChild(s);
+    });
+  }
+
   async function setLanguage(lang, save) {
     if (!LANGS[lang]) { lang = 'de'; }
     dict = {};
     if (lang !== 'de') {
-      try {
-        const res = await fetch(`i18n/${lang}.json?v=${I18N_VERSION}`);
-        if (!res.ok) { throw new Error('HTTP ' + res.status); }
-        dict = await res.json();
-      } catch (err) { lang = 'de'; }
+      try { dict = await loadDict(lang); } catch (err) { lang = 'de'; }
     }
     currentLang = lang;
     if (save) { try { localStorage.setItem(LANG_KEY, lang); } catch (err) { /* ignorieren */ } }
@@ -63,7 +72,8 @@
   }
   langSelect.addEventListener('change', () => setLanguage(langSelect.value, true));
 
-  // Für tools/translate.mjs: alle deutschen Quelltexte sammeln (Aufruf über die Browser-Konsole)
+  // Für tools/translate.mjs: alle deutschen Quelltexte sammeln (Aufruf über die Browser-Konsole,
+  // Seite dafür über einen lokalen Server öffnen, nicht direkt aus dem Ordner)
   window.__i18nSource = async () => {
     const js = await fetch('app.js', { cache: 'no-store' }).then((r) => r.text());
     const text = new Set(Object.values(pageTitles));

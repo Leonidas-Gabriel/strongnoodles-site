@@ -1,4 +1,6 @@
-{
+// Automatisch erzeugt von tools/translate.mjs – Korrekturen direkt hier eintragen.
+window.SN_I18N = window.SN_I18N || {};
+window.SN_I18N.tr = {
  "Zum Inhalt springen": "İçeriğe atla",
  "Startseite": "Ana Sayfa",
  "Unser Team": "Ekibimiz",
@@ -229,4 +231,4 @@
  "E-Mail-Programm wird geöffnet … Falls nichts passiert, schick deine Bestellung direkt an": "E-posta programı açılıyor… Herhangi bir şey olmazsa, siparişini doğrudan şu adrese gönder:",
  "z. B. Lena": "örneğin Lena",
  "E-Mail-Programm wird geöffnet … Alternativ erreichst du uns direkt unter": "E-posta programı açılıyor… Alternatif olarak bize doğrudan şu adresten ulaşabilirsin:"
-}
+};

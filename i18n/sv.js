@@ -1,4 +1,6 @@
-{
+// Automatisch erzeugt von tools/translate.mjs – Korrekturen direkt hier eintragen.
+window.SN_I18N = window.SN_I18N || {};
+window.SN_I18N.sv = {
  "Zum Inhalt springen": "Gå till innehållet",
  "Startseite": "Startsida",
  "Unser Team": "Vårt team",
@@ -229,4 +231,4 @@
  "E-Mail-Programm wird geöffnet … Falls nichts passiert, schick deine Bestellung direkt an": "E-postprogrammet öppnas … Om ingenting händer, skicka din beställning direkt till",
  "z. B. Lena": "t.ex. Lena",
  "E-Mail-Programm wird geöffnet … Alternativ erreichst du uns direkt unter": "E-postprogrammet öppnas … Alternativt kan du kontakta oss direkt på"
-}
+};

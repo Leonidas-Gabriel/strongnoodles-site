@@ -1,4 +1,6 @@
-{
+// Automatisch erzeugt von tools/translate.mjs – Korrekturen direkt hier eintragen.
+window.SN_I18N = window.SN_I18N || {};
+window.SN_I18N.fr = {
  "Zum Inhalt springen": "Aller au contenu",
  "Startseite": "Page d&#x27;accueil",
  "Unser Team": "Notre équipe",
@@ -229,4 +231,4 @@
  "E-Mail-Programm wird geöffnet … Falls nichts passiert, schick deine Bestellung direkt an": "Ton client de messagerie s'ouvre… Si rien ne se passe, envoie ta commande directement à",
  "z. B. Lena": "par exemple Lena",
  "E-Mail-Programm wird geöffnet … Alternativ erreichst du uns direkt unter": "Ton client de messagerie s'ouvre… Tu peux aussi nous contacter directement à l'adresse suivante :"
-}
+};

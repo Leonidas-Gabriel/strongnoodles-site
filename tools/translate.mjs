@@ -1,4 +1,4 @@
-// Übersetzt i18n/source.json mit DeepL in alle Zielsprachen. Bereits übersetzte Texte werden
+// Übersetzt i18n/source.json mit DeepL in alle Zielsprachen (i18n/<code>.js). Bereits übersetzte Texte werden
 // wiederverwendet, es gehen also nur neue oder geänderte Texte an DeepL.
 //
 // Ablauf nach Textänderungen auf der Website:
@@ -7,7 +7,7 @@
 //   2. PowerShell:  $env:DEEPL_KEY = "dein-key";  node tools/translate.mjs
 //   3. In app.js I18N_VERSION erhöhen, damit Browser die neuen Dateien laden.
 //
-// Von Hand verbesserte Übersetzungen direkt in i18n/<code>.json ändern: vorhandene Einträge
+// Von Hand verbesserte Übersetzungen direkt in i18n/<code>.js ändern: vorhandene Einträge
 // überschreibt das Skript nie (nur wenn sich der deutsche Text ändert, wird neu übersetzt).
 //
 // Den DeepL-Key NIE in eine Datei im Repository schreiben.
@@ -45,9 +45,14 @@ async function deepl(texts, target, html) {
 
 const keep = new Set([...source.html, ...source.text]);
 for (const [lang, target] of Object.entries(TARGETS)) {
-  const file = new URL(`${lang}.json`, dir);
+  // Als .js gespeichert (window.SN_I18N.<code> = {...}), damit es auch ohne Server lädt
+  const file = new URL(`${lang}.js`, dir);
   let dict = {};
-  try { dict = JSON.parse(await readFile(file, 'utf8')); } catch { /* neue Sprache */ }
+  try {
+    const js = await readFile(file, 'utf8');
+    const start = js.indexOf('{', js.indexOf(`SN_I18N.${lang} =`));
+    dict = JSON.parse(js.slice(start, js.lastIndexOf('}') + 1));
+  } catch { /* neue Sprache */ }
   let added = 0;
   for (const kind of ['html', 'text']) {
     const missing = source[kind].filter((s) => !(s in dict));
@@ -57,6 +62,7 @@ for (const [lang, target] of Object.entries(TARGETS)) {
     added += missing.length;
   }
   const clean = Object.fromEntries(Object.entries(dict).filter(([k]) => keep.has(k)));
-  await writeFile(file, JSON.stringify(clean, null, 1) + '\n');
+  await writeFile(file, '// Automatisch erzeugt von tools/translate.mjs – Korrekturen direkt hier eintragen.\n'
+    + `window.SN_I18N = window.SN_I18N || {};\nwindow.SN_I18N.${lang} = ${JSON.stringify(clean, null, 1)};\n`);
   console.log(`${lang}: ${Object.keys(clean).length} Einträge (${added} neu übersetzt)`);
 }

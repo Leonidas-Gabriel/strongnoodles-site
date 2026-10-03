@@ -1,4 +1,6 @@
-{
+// Automatisch erzeugt von tools/translate.mjs – Korrekturen direkt hier eintragen.
+window.SN_I18N = window.SN_I18N || {};
+window.SN_I18N.it = {
  "Zum Inhalt springen": "Vai al contenuto",
  "Startseite": "Home",
  "Unser Team": "Il nostro team",
@@ -229,4 +231,4 @@
  "E-Mail-Programm wird geöffnet … Falls nichts passiert, schick deine Bestellung direkt an": "Si sta aprendo il programma di posta elettronica… Se non succede nulla, invia il tuo ordine direttamente a",
  "z. B. Lena": "ad es. Lena",
  "E-Mail-Programm wird geöffnet … Alternativ erreichst du uns direkt unter": "Si sta aprendo il programma di posta elettronica… In alternativa, puoi contattarci direttamente all’indirizzo"
-}
+};
