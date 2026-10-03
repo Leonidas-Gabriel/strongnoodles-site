@@ -1,3 +1,78 @@
+  // ---------- Sprachen ----------
+  // Der deutsche Text im HTML ist die Quelle. Übersetzungen liegen in i18n/<code>.json als
+  // { "deutscher Text": "Übersetzung" } und werden mit tools/translate.mjs über DeepL erzeugt.
+  // Fehlt ein Eintrag, bleibt einfach der deutsche Text stehen.
+  // Nie übersetzen: translate="no". Von JS selbst gepflegte Texte: data-i18n-skip.
+  const LANGS = {
+    de: { locale: 'de-CH' },
+    en: { locale: 'en-GB' },
+    fr: { locale: 'fr-CH' },
+    it: { locale: 'it-CH' },
+    nl: { locale: 'nl-NL' },
+    sv: { locale: 'sv-SE' },
+    tr: { locale: 'tr-TR' }
+  };
+  const LANG_KEY = 'snLang';
+  const I18N_VERSION = '1';
+  const I18N_ATTRS = ['aria-label', 'placeholder', 'title', 'alt', 'data-mail-text'];
+  const LETTER = /\p{L}/u;
+  let currentLang = 'de';
+  let dict = {};
+  const t = (s) => dict[s] || s;
+  const loc = () => LANGS[currentLang].locale;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+  // Deutschen Originalinhalt merken, bevor der restliche Code die Seite verändert
+  const i18nEls = new Map();
+  const i18nAttrs = new Map();
+  document.body.querySelectorAll('*').forEach((el) => {
+    if (el.closest('[data-i18n-skip], script, style, noscript, svg')) { return; }
+    const attrs = {};
+    I18N_ATTRS.forEach((a) => { const v = el.getAttribute(a); if (v && LETTER.test(v)) { attrs[a] = v; } });
+    if (Object.keys(attrs).length) { i18nAttrs.set(el, attrs); }
+    if (el.closest('[translate="no"]')) { return; }
+    const ownText = [...el.childNodes].some((n) => n.nodeType === 3 && LETTER.test(n.nodeValue));
+    if (!ownText) { return; }
+    for (let p = el.parentElement; p; p = p.parentElement) { if (i18nEls.has(p)) { return; } }
+    i18nEls.set(el, el.innerHTML.trim());
+  });
+
+  const langSelect = document.getElementById('langSelect');
+  const langCode = document.getElementById('langCode');
+
+  async function setLanguage(lang, save) {
+    if (!LANGS[lang]) { lang = 'de'; }
+    dict = {};
+    if (lang !== 'de') {
+      try {
+        const res = await fetch(`i18n/${lang}.json?v=${I18N_VERSION}`);
+        if (!res.ok) { throw new Error('HTTP ' + res.status); }
+        dict = await res.json();
+      } catch (err) { lang = 'de'; }
+    }
+    currentLang = lang;
+    if (save) { try { localStorage.setItem(LANG_KEY, lang); } catch (err) { /* ignorieren */ } }
+    i18nEls.forEach((src, el) => { el.innerHTML = t(src); });
+    i18nAttrs.forEach((attrs, el) => { Object.entries(attrs).forEach(([a, src]) => el.setAttribute(a, t(src))); });
+    document.documentElement.lang = lang === 'de' ? 'de-CH' : lang;
+    langSelect.value = lang;
+    langCode.textContent = lang.toUpperCase();
+    langSelect.setAttribute('aria-label', t('Sprache wählen'));
+    document.dispatchEvent(new CustomEvent('langchange'));
+    document.documentElement.classList.remove('i18n-pending');
+  }
+  langSelect.addEventListener('change', () => setLanguage(langSelect.value, true));
+
+  // Für tools/translate.mjs: alle deutschen Quelltexte sammeln (Aufruf über die Browser-Konsole)
+  window.__i18nSource = async () => {
+    const js = await fetch('app.js', { cache: 'no-store' }).then((r) => r.text());
+    const text = new Set(Object.values(pageTitles));
+    for (const m of js.matchAll(/\bt\('((?:[^'\\]|\\.)*)'\)/g)) { text.add(m[1].replace(/\\'/g, "'")); }
+    i18nAttrs.forEach((attrs) => Object.values(attrs).forEach((v) => text.add(v)));
+    const html = [...new Set(i18nEls.values())];
+    return { html, text: [...text].filter((s) => !html.includes(s)) };
+  };
+
   // ---------- Dunkelmodus ----------
   // Startet immer im Hellmodus, ausser die Person hat den Umschalter selbst schon einmal benutzt
   // (die Wahl wird in localStorage gemerkt; das kleine Inline-Skript im <head> wendet sie sofort an,
@@ -7,9 +82,10 @@
   function syncThemeButton() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     themeToggle.setAttribute('aria-pressed', String(isDark));
-    themeToggle.setAttribute('aria-label', isDark ? 'Hellmodus aktivieren' : 'Dunkelmodus aktivieren');
+    themeToggle.setAttribute('aria-label', isDark ? t('Hellmodus aktivieren') : t('Dunkelmodus aktivieren'));
   }
   syncThemeButton();
+  document.addEventListener('langchange', syncThemeButton);
   themeToggle.addEventListener('click', () => {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (isDark) { document.documentElement.removeAttribute('data-theme'); }
@@ -53,7 +129,11 @@
     });
   }
 
+  let currentPage = 'home';
+  document.addEventListener('langchange', () => { document.title = t(pageTitles[currentPage]); });
+
   function showPage(id, moveFocus) {
+    currentPage = id;
     pages.forEach(p => p.classList.toggle('active', p.id === id));
 
     document.querySelectorAll('.nav-links button').forEach(b => {
@@ -67,7 +147,7 @@
     navToggle.classList.remove('open');
     navToggle.setAttribute('aria-expanded', 'false');
 
-    document.title = pageTitles[id];
+    document.title = t(pageTitles[id]);
     if (id === 'home') { runCounters(); }
     document.dispatchEvent(new CustomEvent('pageshown', { detail: id }));
     window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
@@ -95,6 +175,38 @@
     navToggle.classList.toggle('open', isOpen);
     navToggle.setAttribute('aria-expanded', String(isOpen));
   });
+
+  // Burger-Menü auch auf breiten Bildschirmen, sobald die Menüpunkte (je nach Sprache) nicht in eine Zeile passen
+  const headerEl = document.querySelector('header');
+  const brandEl = document.querySelector('.brand');
+  const navRight = document.querySelector('.nav-right');
+  const narrowScreen = window.matchMedia('(max-width: 860px)');
+  function fitNav() {
+    const wasCompact = headerEl.classList.contains('nav-compact');
+    headerEl.classList.remove('nav-compact');
+    let compact = false;
+    if (!narrowScreen.matches) {
+      const nav = navLinks.parentElement.parentElement;
+      const tooTall = [...navLinks.querySelectorAll('button')].some((b) => b.offsetHeight > 40);
+      compact = tooTall || nav.scrollWidth > nav.clientWidth
+        || navRight.getBoundingClientRect().left < brandEl.getBoundingClientRect().right + 24;
+    }
+    headerEl.classList.toggle('nav-compact', compact);
+    if (wasCompact && !compact) {
+      navLinks.classList.remove('open');
+      navToggle.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  }
+  let fitNavQueued = false;
+  window.addEventListener('resize', () => {
+    if (fitNavQueued) { return; }
+    fitNavQueued = true;
+    requestAnimationFrame(() => { fitNavQueued = false; fitNav(); });
+  });
+  document.addEventListener('langchange', fitNav);
+  fitNav();
+  if (document.fonts) { document.fonts.ready.then(fitNav); }
 
   document.getElementById('skipLink').addEventListener('click', (e) => {
     e.preventDefault();
@@ -156,7 +268,7 @@
       form.reset();
       return true;
     } catch (err) {
-      showAlert(alertEl, `Das Senden hat leider nicht geklappt. Bitte versuch es nochmals oder schreib uns direkt an ${CONTACT_EMAIL}.`, true);
+      showAlert(alertEl, t('Das Senden hat leider nicht geklappt. Bitte versuch es nochmals oder schreib uns direkt an {email}.').replace('{email}', CONTACT_EMAIL), true);
       return false;
     } finally {
       submitBtn.disabled = false;
@@ -176,7 +288,7 @@
       alertEl: formAlert,
       subject: `Nachricht von ${name} über die Strongnoodles-Website`,
       fields: { Name: name, 'E-Mail': email, Nachricht: message },
-      okText: 'Danke für deine Nachricht! Wir melden uns so bald wie möglich.'
+      okText: t('Danke für deine Nachricht! Wir melden uns so bald wie möglich.')
     });
   });
 
@@ -191,13 +303,8 @@
   const calcBtn = document.getElementById('calcBtn');
   const calcResult = document.getElementById('calcResult');
 
-  const activityLabels = {
-    '0.9': 'Kaum aktiv',
-    '1.2': 'Leicht aktiv',
-    '1.5': 'Mässig aktiv',
-    '1.8': 'Sehr aktiv',
-    '2.2': 'Extrem aktiv'
-  };
+  // Beschriftung der gewählten Option (ist bereits übersetzt); Klammerzusatz weglassen
+  const optionLabel = (select) => select.options[select.selectedIndex].text.replace(/\s*\(.*\)\s*$/, '');
 
   function runCalc() {
     const age = parseFloat(calcAgeInput.value);
@@ -212,7 +319,7 @@
       && weight >= 20 && weight <= 250;
 
     if (!valid) {
-      calcResult.innerHTML = '<p class="calc-error">Bitte gib ein gültiges Alter (10–100), eine gültige Grösse (120–230 cm) und ein gültiges Gewicht (20–250 kg) ein.</p>';
+      calcResult.innerHTML = `<p class="calc-error">${esc(t('Bitte gib ein gültiges Alter (10–100), eine gültige Grösse (120–230 cm) und ein gültiges Gewicht (20–250 kg) ein.'))}</p>`;
       return;
     }
 
@@ -237,19 +344,20 @@
     calcResult.innerHTML = `
       <div class="calc-result-content">
         <div class="calc-big">${pastaGrams.toFixed(0)}&nbsp;g</div>
-        <p class="calc-sub">Strongnoodles (trocken) pro Tag, um deinen Proteinbedarf mit der Pasta zu decken.</p>
-        <div class="calc-detail"><span>Alter</span><span>${age} Jahre</span></div>
-        <div class="calc-detail"><span>Geschlecht</span><span>${gender === 'male' ? 'Männlich' : 'Weiblich'}</span></div>
-        <div class="calc-detail"><span>Grösse / Gewicht</span><span>${height} cm / ${weight} kg</span></div>
-        <div class="calc-detail"><span>Aktivitätslevel</span><span>${activityLabels[calcActivityInput.value]}</span></div>
-        <div class="calc-detail"><span>Fettfreie Körpermasse (geschätzt)</span><span>${leanMass.toFixed(1)} kg</span></div>
-        <div class="calc-detail"><span>Täglicher Proteinbedarf</span><span>${dailyProteinNeed.toFixed(0)} g</span></div>
-        <div class="calc-detail"><span>Protein in Strongnoodles</span><span>${PROTEIN_PER_100G_PASTA} g / 100 g</span></div>
+        <p class="calc-sub">${esc(t('Strongnoodles (trocken) pro Tag, um deinen Proteinbedarf mit der Pasta zu decken.'))}</p>
+        <div class="calc-detail"><span>${esc(t('Alter'))}</span><span>${esc(t('{n} Jahre').replace('{n}', age))}</span></div>
+        <div class="calc-detail"><span>${esc(t('Geschlecht'))}</span><span>${esc(optionLabel(calcGenderInput))}</span></div>
+        <div class="calc-detail"><span>${esc(t('Grösse / Gewicht'))}</span><span>${height} cm / ${weight} kg</span></div>
+        <div class="calc-detail"><span>${esc(t('Aktivitätslevel'))}</span><span>${esc(optionLabel(calcActivityInput))}</span></div>
+        <div class="calc-detail"><span>${esc(t('Fettfreie Körpermasse (geschätzt)'))}</span><span>${leanMass.toFixed(1)} kg</span></div>
+        <div class="calc-detail"><span>${esc(t('Täglicher Proteinbedarf'))}</span><span>${dailyProteinNeed.toFixed(0)} g</span></div>
+        <div class="calc-detail"><span>${esc(t('Protein in Strongnoodles'))}</span><span>${PROTEIN_PER_100G_PASTA} g / 100 g</span></div>
       </div>
     `;
   }
 
   calcBtn.addEventListener('click', () => { runCalc(); const r = calcBtn.getBoundingClientRect(); burst(r.left + r.width / 2, r.top); });
+  document.addEventListener('langchange', () => { if (calcResult.querySelector('.calc-result-content, .calc-error')) { runCalc(); } });
   [calcAgeInput, calcHeightInput, calcWeightInput].forEach((input) => {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { runCalc(); }
@@ -312,7 +420,7 @@
         'E-Mail': val('orderEmail'),
         ...(note ? { Bemerkung: note } : {})
       },
-      okText: 'Danke für deine Bestellung! Wir melden uns mit den Lieferdetails und den TWINT-Infos.'
+      okText: t('Danke für deine Bestellung! Wir melden uns mit den Lieferdetails und den TWINT-Infos.')
     }).then(() => { updateTotal(); });
   });
 
@@ -359,7 +467,7 @@
     const s = document.createElement('span');
     s.className = 'rev-stars';
     s.setAttribute('role', 'img');
-    s.setAttribute('aria-label', `${n} von 5 Sternen`);
+    s.setAttribute('aria-label', t('{n} von 5 Sternen').replace('{n}', n));
     for (let i = 1; i <= 5; i++) {
       const star = document.createElement('span');
       star.textContent = '★';
@@ -376,10 +484,10 @@
     const avg = allReviews.reduce((sum, r) => sum + r.stars, 0) / allReviews.length;
     const big = document.createElement('div');
     big.className = 'rev-avg';
-    big.textContent = avg.toFixed(1).replace('.', ',');
+    big.textContent = avg.toLocaleString(loc(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const text = document.createElement('div');
     text.className = 'rev-summary-text';
-    text.textContent = `von 5 · ${allReviews.length} Bewertung${allReviews.length === 1 ? '' : 'en'}`;
+    text.textContent = `${t('von 5')} · ${(allReviews.length === 1 ? t('{n} Bewertung') : t('{n} Bewertungen')).replace('{n}', allReviews.length)}`;
     revSummary.append(big, starsEl(Math.round(avg)), text);
   }
 
@@ -388,7 +496,7 @@
     if (!allReviews.length) {
       const p = document.createElement('p');
       p.className = 'rev-empty';
-      p.textContent = 'Noch keine Bewertungen. Sei die erste Person!';
+      p.textContent = t('Noch keine Bewertungen. Sei die erste Person!');
       revList.appendChild(p);
       revMore.hidden = true;
       return;
@@ -400,10 +508,10 @@
       head.className = 'rev-head';
       const name = document.createElement('span');
       name.className = 'rev-name';
-      name.textContent = r.name || 'Anonym';
+      name.textContent = r.name || t('Anonym');
       const date = document.createElement('span');
       date.className = 'rev-date';
-      date.textContent = new Date(r.created_at).toLocaleDateString('de-CH');
+      date.textContent = new Date(r.created_at).toLocaleDateString(loc());
       head.append(name, starsEl(r.stars), date);
       const comment = document.createElement('p');
       comment.className = 'rev-comment';
@@ -413,7 +521,7 @@
         const del = document.createElement('button');
         del.type = 'button';
         del.className = 'rev-delete';
-        del.textContent = 'Löschen';
+        del.textContent = t('Löschen');
         del.addEventListener('click', () => deleteReview(r.id));
         item.appendChild(del);
       }
@@ -425,7 +533,7 @@
   function renderAdminState() {
     revLoginForm.hidden = Boolean(adminToken);
     revAdminOn.hidden = !adminToken;
-    revAdminToggle.textContent = adminToken ? 'Admin (angemeldet)' : 'Admin';
+    revAdminToggle.textContent = adminToken ? t('Admin (angemeldet)') : t('Admin');
   }
 
   async function loadReviews() {
@@ -433,7 +541,7 @@
       revSummary.style.display = 'none';
       const p = document.createElement('p');
       p.className = 'rev-note';
-      p.textContent = 'Die Bewertungen sind bald verfügbar.';
+      p.textContent = t('Die Bewertungen sind bald verfügbar.');
       revList.replaceChildren(p);
       revForm.querySelectorAll('input, textarea, button').forEach((el) => { el.disabled = true; });
       return;
@@ -448,19 +556,19 @@
     } catch (err) {
       const p = document.createElement('p');
       p.className = 'rev-note';
-      p.textContent = 'Die Bewertungen konnten gerade nicht geladen werden. Bitte versuch es später nochmals.';
+      p.textContent = t('Die Bewertungen konnten gerade nicht geladen werden. Bitte versuch es später nochmals.');
       revList.replaceChildren(p);
     }
   }
 
   async function deleteReview(id) {
-    if (!window.confirm('Diese Bewertung wirklich löschen?')) { return; }
+    if (!window.confirm(t('Diese Bewertung wirklich löschen?'))) { return; }
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/reviews?id=eq.${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: sbHeaders({ Prefer: 'return=representation' })
       });
-      if (res.status === 401 || res.status === 403) { adminLogout(); showAlert(revAdminAlert, 'Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.', true); return; }
+      if (res.status === 401 || res.status === 403) { adminLogout(); showAlert(revAdminAlert, t('Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.'), true); return; }
       if (!res.ok) { throw new Error('HTTP ' + res.status); }
       const deleted = await res.json();
       if (!deleted.length) { throw new Error('nichts gelöscht'); }
@@ -468,7 +576,7 @@
       renderSummary();
       renderReviews();
     } catch (err) {
-      window.alert('Das Löschen hat nicht geklappt.');
+      window.alert(t('Das Löschen hat nicht geklappt.'));
     }
   }
 
@@ -488,7 +596,7 @@
 
   revLoginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!reviewsConfigured) { showAlert(revAdminAlert, 'Die Bewertungen sind noch nicht eingerichtet.', true); return; }
+    if (!reviewsConfigured) { showAlert(revAdminAlert, t('Die Bewertungen sind noch nicht eingerichtet.'), true); return; }
     const email = document.getElementById('revAdminEmail').value.trim();
     const password = document.getElementById('revAdminPass').value;
     try {
@@ -506,7 +614,7 @@
       renderAdminState();
       renderReviews();
     } catch (err) {
-      showAlert(revAdminAlert, 'Anmeldung fehlgeschlagen. Prüfe E-Mail und Passwort.', true);
+      showAlert(revAdminAlert, t('Anmeldung fehlgeschlagen. Prüfe E-Mail und Passwort.'), true);
     }
   });
 
@@ -521,13 +629,13 @@
     const starsInput = revForm.querySelector('input[name=revStars]:checked');
     const comment = revComment.value.trim();
     const name = document.getElementById('revName').value.trim();
-    if (!starsInput) { showAlert(revAlert, 'Bitte wähle zuerst Sterne aus.', true); return; }
-    if (!comment) { showAlert(revAlert, 'Bitte schreib einen kurzen Kommentar.', true); revComment.focus(); return; }
+    if (!starsInput) { showAlert(revAlert, t('Bitte wähle zuerst Sterne aus.'), true); return; }
+    if (!comment) { showAlert(revAlert, t('Bitte schreib einen kurzen Kommentar.'), true); revComment.focus(); return; }
 
     // einfache Bremse gegen Mehrfach-Klicks (kein echter Spam-Schutz, der liegt in der Datenbank)
     try {
       const last = parseInt(localStorage.getItem('revLastSent'), 10) || 0;
-      if (Date.now() - last < 60000) { showAlert(revAlert, 'Bitte warte kurz, bevor du eine weitere Bewertung abschickst.', true); return; }
+      if (Date.now() - last < 60000) { showAlert(revAlert, t('Bitte warte kurz, bevor du eine weitere Bewertung abschickst.'), true); return; }
     } catch (err) { /* ignorieren */ }
 
     const btn = revForm.querySelector('button[type=submit]');
@@ -542,12 +650,12 @@
       try { localStorage.setItem('revLastSent', String(Date.now())); } catch (err) { /* ignorieren */ }
       revForm.reset();
       revCounter.textContent = '0 / 500';
-      showAlert(revAlert, 'Danke für deine Bewertung!', false);
+      showAlert(revAlert, t('Danke für deine Bewertung!'), false);
       const r = btn.getBoundingClientRect();
       burst(r.left + r.width / 2, r.top);
       await loadReviews();
     } catch (err) {
-      showAlert(revAlert, 'Das Senden hat leider nicht geklappt. Bitte versuch es später nochmals.', true);
+      showAlert(revAlert, t('Das Senden hat leider nicht geklappt. Bitte versuch es später nochmals.'), true);
     } finally {
       btn.disabled = false;
     }
@@ -558,6 +666,7 @@
   });
   renderAdminState();
   if (window.location.hash === '#reviews') { loadReviews(); }
+  document.addEventListener('langchange', () => { renderAdminState(); if (reviewsLoaded) { renderSummary(); renderReviews(); } });
 
   // ---------- Pasta-Clicker ----------
   const clickerBtn = document.getElementById('clickerBtn');
@@ -570,10 +679,11 @@
   } catch (err) { clickerPoints = 0; }
 
   function renderClicker() {
-    clickerCount.textContent = clickerPoints.toLocaleString('de-CH');
-    clickerBtn.setAttribute('aria-label', `Pasta-Clicker, Punkte: ${clickerPoints}`);
+    clickerCount.textContent = clickerPoints.toLocaleString(loc());
+    clickerBtn.setAttribute('aria-label', t('Pasta-Clicker, Punkte: {n}').replace('{n}', clickerPoints));
   }
   renderClicker();
+  document.addEventListener('langchange', renderClicker);
 
   clickerBtn.addEventListener('click', () => {
     clickerPoints += 1;
@@ -585,7 +695,7 @@
       const plus = document.createElement('span');
       plus.className = 'clicker-plus';
       plus.setAttribute('aria-hidden', 'true');
-      plus.textContent = clickerPoints % 10 === 0 ? 'Weiter so!' : '+1';
+      plus.textContent = clickerPoints % 10 === 0 ? t('Weiter so!') : '+1';
       plus.style.left = (15 + Math.random() * 55) + '%';
       plus.addEventListener('animationend', () => plus.remove());
       clickerBtn.appendChild(plus);
@@ -646,3 +756,9 @@
       io.observe(el);
     });
   }
+
+  // Gespeicherte Sprache erst ganz am Schluss anwenden, wenn alles andere eingerichtet ist
+  let savedLang = 'de';
+  try { savedLang = localStorage.getItem(LANG_KEY) || 'de'; } catch (err) { savedLang = 'de'; }
+  if (savedLang !== 'de') { setLanguage(savedLang, false); }
+  else { document.documentElement.classList.remove('i18n-pending'); }

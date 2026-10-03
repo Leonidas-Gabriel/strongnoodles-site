@@ -201,6 +201,42 @@
   .theme-toggle:focus-visible { outline-color: var(--tomato); }
   .theme-toggle svg { width: 22px; height: 22px; }
   .theme-icon-moon { display: none; }
+
+  /* Language picker: native <select> laid invisibly over a styled pill, so it stays accessible */
+  .lang-picker {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    height: 42px;
+    padding: 0 0.7rem;
+    border: 2.5px solid var(--ink-fixed);
+    background: var(--durum);
+    color: var(--ink-fixed);
+    box-shadow: 3px 3px 0 var(--ink-fixed);
+    font-family: var(--body);
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.2s ease;
+  }
+  .lang-picker:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink-fixed); background: var(--durum-deep); }
+  .lang-picker:focus-within { outline: 3px solid var(--tomato); outline-offset: 3px; }
+  .lang-globe { width: 18px; height: 18px; }
+  .lang-picker select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: 0;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* Hidden until a saved non-German language has been applied (inline script in <head> sets this) */
+  html.i18n-pending body { visibility: hidden; }
   :root[data-theme="dark"] .theme-icon-sun { display: none; }
   :root[data-theme="dark"] .theme-icon-moon { display: block; }
 
@@ -1019,6 +1055,22 @@
     .nav-toggle { display: flex; }
   }
 
+  /* Same burger menu on wider screens whenever the menu labels (e.g. in French) don't fit; set by app.js */
+  header.nav-compact .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 76px;
+    left: 0;
+    right: 0;
+    background: var(--flour);
+    border-bottom: 3px solid var(--ink);
+    padding: 1rem 32px 1.6rem;
+    gap: 1rem;
+  }
+  header.nav-compact .nav-links.open { display: flex; }
+  header.nav-compact .nav-toggle { display: flex; }
+
   @media (max-width: 560px) {
     .wrap { padding: 0 20px; }
     .nav-links { padding-left: 20px; padding-right: 20px; }
@@ -1036,6 +1088,13 @@
     .marquee ul { font-size: 1.1rem; }
     .clicker-label { display: none; }
     .clicker-btn { padding: 0.5rem; gap: 0; }
+    .nav-right { gap: 0.7rem; }
+    .lang-picker { padding: 0 0.5rem; }
+  }
+
+  @media (max-width: 420px) {
+    .lang-globe { display: none; }
+    .brand { font-size: 1.55rem; }
   }
 
   @media (max-width: 400px) {

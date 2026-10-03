@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>(function(){try{if(localStorage.getItem('snTheme')==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
+<script>(function(){try{var d=document.documentElement;if(localStorage.getItem('snTheme')==='dark'){d.setAttribute('data-theme','dark');}var l=localStorage.getItem('snLang');if(l&&l!=='de'){d.classList.add('i18n-pending');setTimeout(function(){d.classList.remove('i18n-pending');},3000);}}catch(e){}})();</script>
 <title>Strongnoodles – High-Protein Pasta aus Zug</title>
 <meta name="description" content="High-Protein Pasta, regional hergestellt. 37 g Protein pro 100 g mit echtem Pasta-Geschmack. Ein YES-Projekt von fünf Schüler:innen.">
 <meta name="theme-color" content="#141414">
@@ -62,7 +62,7 @@
 
 <link rel="preload" as="image" href="images/logo.webp" type="image/webp">
 <link rel="preload" as="font" type="font/woff2" href="fonts/anton-latin.woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=12">
+<link rel="stylesheet" href="styles.css?v=14">
 <noscript><style>.page{display:block !important;margin-bottom:48px}.nav-toggle{display:none}</style></noscript>
 </head>
 <body>
@@ -73,7 +73,7 @@
 
 <header>
   <nav class="wrap" aria-label="Hauptnavigation">
-    <button type="button" class="brand" data-page="home" aria-label="Strongnoodles, zur Startseite">strong<span>noodles</span></button>
+    <button type="button" class="brand" translate="no" data-page="home" aria-label="Strongnoodles, zur Startseite">strong<span>noodles</span></button>
     <div class="nav-right">
       <ul class="nav-links" id="navLinks">
         <li><button type="button" data-page="home" class="active" aria-current="page">Startseite</button></li>
@@ -83,7 +83,20 @@
         <li><button type="button" data-page="reviews">Bewertungen</button></li>
         <li><button type="button" data-page="contact">Kontakt</button></li>
       </ul>
-      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Dunkelmodus aktivieren">
+      <div class="lang-picker" data-i18n-skip>
+        <svg class="lang-globe" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span class="lang-code" id="langCode" aria-hidden="true">DE</span>
+        <select id="langSelect" aria-label="Sprache wählen">
+          <option value="de" lang="de">Deutsch</option>
+          <option value="en" lang="en">English</option>
+          <option value="fr" lang="fr">Français</option>
+          <option value="it" lang="it">Italiano</option>
+          <option value="nl" lang="nl">Nederlands</option>
+          <option value="sv" lang="sv">Svenska</option>
+          <option value="tr" lang="tr">Türkçe</option>
+        </select>
+      </div>
+      <button type="button" class="theme-toggle" id="themeToggle" data-i18n-skip aria-pressed="false" aria-label="Dunkelmodus aktivieren">
         <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7M18.4 18.4l-1.7-1.7M7.3 7.3 5.6 5.6"/></g></svg>
         <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>
       </button>
@@ -109,7 +122,7 @@
       </div>
       <div class="art">
         <img class="noodle-art" src="images/logo.webp" width="1062" height="782" alt="Strongnoodles Logo" fetchpriority="high">
-        <div class="sticker" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon points="50.0,3.0 55.8,9.4 63.2,4.9 67.0,12.7 75.4,10.5 76.8,19.0 85.5,19.2 84.5,27.8 92.8,30.5 89.3,38.4 96.5,43.3 91.0,50.0 96.5,56.7 89.3,61.6 92.8,69.5 84.5,72.2 85.5,80.8 76.8,81.0 75.4,89.5 67.0,87.3 63.2,95.1 55.8,90.6 50.0,97.0 44.2,90.6 36.8,95.1 33.0,87.3 24.6,89.5 23.2,81.0 14.5,80.8 15.5,72.2 7.2,69.5 10.7,61.6 3.5,56.7 9.0,50.0 3.5,43.3 10.7,38.4 7.2,30.5 15.5,27.8 14.5,19.2 23.2,19.0 24.6,10.5 33.0,12.7 36.8,4.9 44.2,9.4"/></svg><b>37&nbsp;g</b><span>Protein pro 100&nbsp;g</span></div>
+        <div class="sticker" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon points="50.0,3.0 55.8,9.4 63.2,4.9 67.0,12.7 75.4,10.5 76.8,19.0 85.5,19.2 84.5,27.8 92.8,30.5 89.3,38.4 96.5,43.3 91.0,50.0 96.5,56.7 89.3,61.6 92.8,69.5 84.5,72.2 85.5,80.8 76.8,81.0 75.4,89.5 67.0,87.3 63.2,95.1 55.8,90.6 50.0,97.0 44.2,90.6 36.8,95.1 33.0,87.3 24.6,89.5 23.2,81.0 14.5,80.8 15.5,72.2 7.2,69.5 10.7,61.6 3.5,56.7 9.0,50.0 3.5,43.3 10.7,38.4 7.2,30.5 15.5,27.8 14.5,19.2 23.2,19.0 24.6,10.5 33.0,12.7 36.8,4.9 44.2,9.4"/></svg><b translate="no">37&nbsp;g</b><span>Protein pro 100&nbsp;g</span></div>
         <svg class="bolt bolt-y bolt-1" viewBox="0 0 60 100" aria-hidden="true" focusable="false"><path d="M34 2 L6 56 H26 L16 98 L54 40 H33 L46 2 Z"/></svg>
         <svg class="bolt bolt-r bolt-2" viewBox="0 0 60 100" aria-hidden="true" focusable="false"><path d="M34 2 L6 56 H26 L16 98 L54 40 H33 L46 2 Z"/></svg>
         <svg class="bolt bolt-y bolt-3" viewBox="0 0 60 100" aria-hidden="true" focusable="false"><path d="M34 2 L6 56 H26 L16 98 L54 40 H33 L46 2 Z"/></svg>
@@ -134,14 +147,14 @@
     </div>
 
     <div class="stat-strip">
-      <div class="stat"><div class="num"><span data-count="37">37</span>&nbsp;g</div><div class="label">Protein pro 100&nbsp;g Pasta</div></div>
-      <div class="stat"><div class="num"><span data-count="100">100</span>%</div><div class="label">Regionale Herstellung</div></div>
-      <div class="stat"><div class="num"><span data-count="5">5</span></div><div class="label">Gründer:innen aus Zug</div></div>
+      <div class="stat"><div class="num" translate="no"><span data-count="37">37</span>&nbsp;g</div><div class="label">Protein pro 100&nbsp;g Pasta</div></div>
+      <div class="stat"><div class="num" translate="no"><span data-count="100">100</span>%</div><div class="label">Regionale Herstellung</div></div>
+      <div class="stat"><div class="num" translate="no"><span data-count="5">5</span></div><div class="label">Gründer:innen aus Zug</div></div>
     </div>
 
     <!-- PROMO VIDEO: file must be in the same folder as index.html -->
     <figure class="promo-video">
-      <video id="promoVideo" controls muted loop playsinline preload="metadata">
+      <video id="promoVideo" data-i18n-skip controls muted loop playsinline preload="metadata">
         <source src="Werbevideo.mp4" type="video/mp4">
         Dein Browser kann dieses Video leider nicht abspielen.
         <a href="Werbevideo.mp4">Video herunterladen</a>
@@ -197,36 +210,36 @@
       <!-- 1. Leon Windhager -->
       <div class="member">
         <img class="avatar-img" width="52" height="52" src="images/team-leon.webp" loading="lazy" decoding="async" alt="Leon Windhager">
-        <h2>Leon Windhager</h2>
-        <div class="role">CEO</div>
+        <h2 translate="no">Leon Windhager</h2>
+        <div class="role" translate="no">CEO</div>
       </div>
 
       <!-- 2. Niels Rudolf -->
       <div class="member">
         <img class="avatar-img" width="52" height="52" src="images/team-niels.webp" loading="lazy" decoding="async" alt="Niels Rudolf" />
-        <h2>Niels Rudolf</h2>
-        <div class="role">CAO/CPO</div>
+        <h2 translate="no">Niels Rudolf</h2>
+        <div class="role" translate="no">CAO/CPO</div>
       </div>
 
       <!-- 3. Leonidas Gabriel -->
       <div class="member">
         <img class="avatar-img" width="52" height="52" src="images/team-leonidas.webp" loading="lazy" decoding="async" alt="Leonidas Gabriel" >
-        <h2>Leonidas Gabriel</h2>
-        <div class="role">CTO/CMO</div>
+        <h2 translate="no">Leonidas Gabriel</h2>
+        <div class="role" translate="no">CTO/CMO</div>
       </div>
 
       <!-- 4. Nefeli Kritikou -->
       <div class="member">
         <img class="avatar-img" width="52" height="52" src="images/team-nefeli.webp" loading="lazy" decoding="async" alt="Nefeli Kritikou">
-        <h2>Nefeli Kritikou</h2>
-        <div class="role">CFO</div>
+        <h2 translate="no">Nefeli Kritikou</h2>
+        <div class="role" translate="no">CFO</div>
       </div>
 
       <!-- 5. Silvan Fischer -->
       <div class="member">
         <img class="avatar-img" width="52" height="52" src="images/team-silvan.webp" loading="lazy" decoding="async" alt="Silvan Fischer">
-        <h2>Silvan Fischer</h2>
-        <div class="role">CPO/CMO</div>
+        <h2 translate="no">Silvan Fischer</h2>
+        <div class="role" translate="no">CPO/CMO</div>
       </div>
 
     </div>
@@ -301,7 +314,7 @@
     <div class="section-head">
       <div class="eyebrow">Bestellen</div>
       <h1>Hol dir deine Strongnoodles.</h1>
-      <p>Wähl deine Menge, gib deine Adresse an und schick die Bestellung ab. Eine Packung kostet <span data-price>CHF&nbsp;7.95</span>. Die Lieferkosten <span data-shipping>werden später festgelegt</span> und dir zusammen mit den Zahlungsinfos mitgeteilt. Bezahlt wird per <span data-payment>TWINT</span>. Nach deiner Bestellung melden wir uns mit den Lieferdetails.</p>
+      <p>Wähl deine Menge, gib deine Adresse an und schick die Bestellung ab. Eine Packung kostet <span data-price translate="no">CHF&nbsp;7.95</span>. Die Lieferkosten <span data-shipping>werden später festgelegt</span> und dir zusammen mit den Zahlungsinfos mitgeteilt. Bezahlt wird per <span data-payment translate="no">TWINT</span>. Nach deiner Bestellung melden wir uns mit den Lieferdetails.</p>
     </div>
 
     <div class="contact-grid">
@@ -338,10 +351,10 @@
             </div>
           </div>
           <div class="order-total" aria-live="polite">
-            <div><span>Preis pro Packung</span><span data-price>CHF 7.95</span></div>
+            <div><span>Preis pro Packung</span><span data-price translate="no">CHF 7.95</span></div>
             <div><span>Lieferkosten</span><span id="orderShipping" data-shipping>werden später festgelegt</span></div>
-            <div><span>Zahlungsmethode</span><span data-payment>TWINT</span></div>
-            <div class="total-line"><span>Zwischensumme (ohne Lieferkosten)</span><span id="orderTotal">CHF 7.95</span></div>
+            <div><span>Zahlungsmethode</span><span data-payment translate="no">TWINT</span></div>
+            <div class="total-line"><span>Zwischensumme (ohne Lieferkosten)</span><span id="orderTotal" translate="no">CHF 7.95</span></div>
           </div>
           <p class="calc-note">Die Lieferkosten sind hier noch nicht eingerechnet und werden dir separat mitgeteilt.</p>
           <div class="field">
@@ -360,11 +373,11 @@
         </div>
         <div class="info-block">
           <h2>Preis</h2>
-          <p><span data-price>CHF&nbsp;7.95</span> pro Packung<br>Lieferkosten: <span data-shipping>werden später festgelegt</span></p>
+          <p><span data-price translate="no">CHF&nbsp;7.95</span> pro Packung<br>Lieferkosten: <span data-shipping>werden später festgelegt</span></p>
         </div>
         <div class="info-block">
           <h2>Zahlung</h2>
-          <p>Per <span data-payment>TWINT</span></p>
+          <p>Per <span data-payment translate="no">TWINT</span></p>
         </div>
         <div class="info-block">
           <h2>Was drin ist</h2>
@@ -424,7 +437,7 @@
         <div class="form-alert" id="revAlert" role="status" aria-live="polite"></div>
 
         <div class="rev-admin">
-          <button type="button" class="rev-admin-toggle" id="revAdminToggle" aria-expanded="false" aria-controls="revAdminBox">Admin</button>
+          <button type="button" class="rev-admin-toggle" id="revAdminToggle" data-i18n-skip aria-expanded="false" aria-controls="revAdminBox">Admin</button>
           <div id="revAdminBox" hidden>
             <form id="revLoginForm" class="rev-login" novalidate>
               <div class="field">
@@ -582,7 +595,7 @@
         <li>Ein Skip-Link, um direkt zum Hauptinhalt zu springen.</li>
         <li>Alternativtexte für aussagekräftige Grafiken.</li>
         <li>Semantisches HTML5 zur Unterstützung von Screenreadern.</li>
-        <li>Berücksichtigung von reduzierten Bewegungseinstellungen (<code>prefers-reduced-motion</code>) bei Animationen.</li>
+        <li>Berücksichtigung von reduzierten Bewegungseinstellungen (<code translate="no">prefers-reduced-motion</code>) bei Animationen.</li>
         <li>Die Website funktioniert auch ohne JavaScript mit einem Hinweistext und allen Inhalten sichtbar.</li>
       </ul>
       <p>Das Werbevideo auf der Startseite enthält nur Hintergrundmusik ohne gesprochenen Text; es sind daher keine Untertitel erforderlich.</p>
@@ -607,11 +620,11 @@
   </div>
 </footer>
 
-<button type="button" class="clicker-btn" id="clickerBtn" aria-label="Pasta-Clicker, Punkte: 0">
+<button type="button" class="clicker-btn" id="clickerBtn" data-i18n-skip aria-label="Pasta-Clicker, Punkte: 0">
   <span class="clicker-label">Pasta-Clicker</span><span class="clicker-count" id="clickerCount" aria-hidden="true">0</span>
 </button>
 
-<script src="app.js?v=12" defer></script>
+<script src="app.js?v=14" defer></script>
 
 </body>
 </html>
