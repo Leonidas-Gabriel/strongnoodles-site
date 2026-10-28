@@ -245,14 +245,14 @@
     </div>
 
     <!-- GROUP PHOTO
-         Drop the file at images/team-group.jpg (or .webp) and set it as the src of <img id="groupPhoto"> below.
-         As soon as a src is there, the photo covers the placeholder. -->
+         Photo lives at images/team-group.webp (4:3 crop). It covers the placeholder underneath,
+         which only shows if the image is missing or has no src. -->
     <figure class="group-photo">
       <div class="group-photo-frame">
         <div class="group-photo-placeholder" role="img" aria-label="Platzhalter für das Gruppenfoto">
           <span>Gruppenfoto folgt</span>
         </div>
-        <img id="groupPhoto" width="1600" height="700" alt="Das Strongnoodles-Team zusammen">
+        <img id="groupPhoto" src="images/team-group.webp" width="1152" height="864" loading="lazy" decoding="async" alt="Das Strongnoodles-Team zusammen">
       </div>
       <figcaption>Das ganze Strongnoodles-Team.</figcaption>
     </figure>

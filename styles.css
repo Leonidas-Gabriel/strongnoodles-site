@@ -732,7 +732,9 @@
   }
   .group-photo-frame {
     position: relative;
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 4 / 3;
+    max-width: 780px;
+    margin: 0 auto;
     background: var(--paper);
     border: 2.5px solid var(--ink);
     box-shadow: 8px 8px 0 var(--durum);
