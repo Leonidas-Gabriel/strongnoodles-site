@@ -13,7 +13,7 @@
     tr: { locale: 'tr-TR' }
   };
   const LANG_KEY = 'snLang';
-  const I18N_VERSION = '2';
+  const I18N_VERSION = '3';
   const I18N_ATTRS = ['aria-label', 'placeholder', 'title', 'alt', 'data-mail-text'];
   const LETTER = /\p{L}/u;
   let currentLang = 'de';
@@ -233,7 +233,7 @@
   handleRoute();
 
   // ---------- Formulare ----------
-  const CONTACT_EMAIL = 'strongnoodles.yes@gmail.com';
+  const CONTACT_EMAIL = 'info@strongnoodles.ch';
   // Sobald hier die URL eines Formular-Dienstes steht (z. B. Formspree oder Web3Forms),
   // werden Bestellungen und Nachrichten direkt versendet. Leer = Fallback über das E-Mail-Programm.
   const FORM_ENDPOINT = 'https://formspree.io/f/xkjgyyen';
