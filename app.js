@@ -1,3 +1,12 @@
+  // ---------- Bestellungen ins Google Sheet ----------
+  // Jede erfolgreiche Bestellung wird zusätzlich an eine Google-Apps-Script-Web-App geschickt, die sie
+  // als neue Zeile ins Blatt "Bestellungen" schreibt. Einrichtung: siehe SETUP-BESTELLUNGEN-SHEET.md.
+  // ORDER_SHEET_URL: die Web-App-URL (endet auf /exec). Leer = Sheet-Übermittlung ausgeschaltet.
+  const ORDER_SHEET_URL = '';
+  // ORDER_SHEET_TOKEN: muss mit TOKEN in google-sheet/Code.gs übereinstimmen. Kein echtes Geheimnis
+  // (steht öffentlich hier), hält aber Bots ab, die die URL zufällig finden.
+  const ORDER_SHEET_TOKEN = 'sn-bestellung-4q8z2m7k';
+
   // ---------- Sprachen ----------
   // Der deutsche Text im HTML ist die Quelle. Übersetzungen liegen in i18n/<code>.js als
   // { "deutscher Text": "Übersetzung" } und werden mit tools/translate.mjs über DeepL erzeugt.
@@ -13,7 +22,7 @@
     tr: { locale: 'tr-TR' }
   };
   const LANG_KEY = 'snLang';
-  const I18N_VERSION = '3';
+  const I18N_VERSION = '4';
   const I18N_ATTRS = ['aria-label', 'placeholder', 'title', 'alt', 'data-mail-text'];
   const LETTER = /\p{L}/u;
   let currentLang = 'de';
@@ -407,11 +416,29 @@
   document.getElementById('qtyMinus').addEventListener('click', () => changeQty(-1));
   document.getElementById('qtyPlus').addEventListener('click', () => changeQty(1));
 
+  // Schickt die Bestellung ans Google Sheet. "Fire and forget": niemand wartet darauf, Fehler landen nur in
+  // der Konsole. no-cors + text/plain = "einfache" Anfrage ohne CORS-Preflight; die Antwort ist dafür
+  // nicht lesbar, Erfolg also nur im Sheet bzw. im Ausführungsprotokoll von Apps Script sichtbar.
+  function sendOrderToSheet(order) {
+    if (!ORDER_SHEET_URL) { return; }
+    fetch(ORDER_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ token: ORDER_SHEET_TOKEN, ...order })
+    }).catch((err) => { console.warn('Bestellung konnte nicht ins Google Sheet geschrieben werden:', err); });
+  }
+
   orderForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const val = (id) => document.getElementById(id).value.trim();
     const qty = currentQty();
     const note = val('orderNote');
+    // Jetzt auslesen: nach erfolgreichem Senden leert submitForm() das Formular.
+    const sheetOrder = {
+      name: val('orderName'), email: val('orderEmail'), street: val('orderStreet'),
+      zip: val('orderZip'), city: val('orderCity'), qty, note
+    };
 
     const packs = `${qty} Packung${qty === 1 ? '' : 'en'}`;
     const sb = orderForm.querySelector('button[type=submit]').getBoundingClientRect();
@@ -431,7 +458,11 @@
         ...(note ? { Bemerkung: note } : {})
       },
       okText: t('Danke für deine Bestellung! Wir melden uns mit den Lieferdetails und den TWINT-Infos.')
-    }).then(() => { updateTotal(); });
+    }).then((ok) => {
+      updateTotal();
+      // Erst nach erfolgreichem Formspree-Versand, sonst gäbe es bei einem erneuten Versuch Doppelzeilen.
+      if (ok && FORM_ENDPOINT) { sendOrderToSheet(sheetOrder); }
+    });
   });
 
   // ---------- Bewertungen (Supabase) ----------
