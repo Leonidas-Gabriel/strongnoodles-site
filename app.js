@@ -2,7 +2,7 @@
   // Jede erfolgreiche Bestellung wird zusätzlich an eine Google-Apps-Script-Web-App geschickt, die sie
   // als neue Zeile ins Blatt "Bestellungen" schreibt. Einrichtung: siehe SETUP-BESTELLUNGEN-SHEET.md.
   // ORDER_SHEET_URL: die Web-App-URL (endet auf /exec). Leer = Sheet-Übermittlung ausgeschaltet.
-  const ORDER_SHEET_URL = '';
+  const ORDER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwnWYxK_p-tEKcEaOKLwix0lJc8AL16naMJxosZNiLLNbNK1GeBojMgnUJ_vhbiOBVZ/exec';
   // ORDER_SHEET_TOKEN: muss mit TOKEN in google-sheet/Code.gs übereinstimmen. Kein echtes Geheimnis
   // (steht öffentlich hier), hält aber Bots ab, die die URL zufällig finden.
   const ORDER_SHEET_TOKEN = 'sn-bestellung-4q8z2m7k';
