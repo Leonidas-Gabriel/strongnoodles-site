@@ -1,11 +1,12 @@
-  // ---------- Bestellungen ins Google Sheet ----------
-  // Jede erfolgreiche Bestellung wird zusätzlich an eine Google-Apps-Script-Web-App geschickt, die sie
-  // als neue Zeile ins Blatt "Bestellungen" schreibt. Einrichtung: siehe SETUP-BESTELLUNGEN-SHEET.md.
-  // ORDER_SHEET_URL: die Web-App-URL (endet auf /exec). Leer = Sheet-Übermittlung ausgeschaltet.
-  const ORDER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwnWYxK_p-tEKcEaOKLwix0lJc8AL16naMJxosZNiLLNbNK1GeBojMgnUJ_vhbiOBVZ/exec';
-  // ORDER_SHEET_TOKEN: muss mit TOKEN in google-sheet/Code.gs übereinstimmen. Kein echtes Geheimnis
+  // ---------- Formulare über Google Apps Script ----------
+  // Bestell- und Kontaktformular gehen an eine Google-Apps-Script-Web-App (google-sheet/Code.gs).
+  // Bestellungen schreibt sie als neue Zeile ins Blatt "Bestellungen" und schickt uns eine Mail,
+  // Kontaktnachrichten leitet sie nur per Mail weiter. Einrichtung: siehe SETUP-BESTELLUNGEN-SHEET.md.
+  // WEBAPP_URL: die Web-App-URL (endet auf /exec). Leer = Fallback über das E-Mail-Programm (mailto:).
+  const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwnWYxK_p-tEKcEaOKLwix0lJc8AL16naMJxosZNiLLNbNK1GeBojMgnUJ_vhbiOBVZ/exec';
+  // WEBAPP_TOKEN: muss mit TOKEN in google-sheet/Code.gs übereinstimmen. Kein echtes Geheimnis
   // (steht öffentlich hier), hält aber Bots ab, die die URL zufällig finden.
-  const ORDER_SHEET_TOKEN = 'sn-bestellung-4q8z2m7k';
+  const WEBAPP_TOKEN = 'sn-bestellung-4q8z2m7k';
 
   // ---------- Sprachen ----------
   // Der deutsche Text im HTML ist die Quelle. Übersetzungen liegen in i18n/<code>.js als
@@ -243,9 +244,6 @@
 
   // ---------- Formulare ----------
   const CONTACT_EMAIL = 'info@strongnoodles.ch';
-  // Sobald hier die URL eines Formular-Dienstes steht (z. B. Formspree oder Web3Forms),
-  // werden Bestellungen und Nachrichten direkt versendet. Leer = Fallback über das E-Mail-Programm.
-  const FORM_ENDPOINT = 'https://formspree.io/f/xkjgyyen';
 
   function showAlert(el, text, isError) {
     el.textContent = text;
@@ -263,12 +261,13 @@
     el.style.display = 'block';
   }
 
-  // fields: { Label: value }. Sendet per Endpoint, sonst per mailto:.
-  async function submitForm({ form, alertEl, subject, fields, okText }) {
+  // fields: { Label: value } für die Mail. data: was die Web-App bekommt (type 'order' oder 'contact').
+  // Sendet an die Web-App und wartet auf deren Antwort { ok: true }. Ohne WEBAPP_URL: mailto:.
+  async function submitForm({ form, alertEl, subject, fields, data, okText }) {
     const submitBtn = form.querySelector('button[type=submit]');
     const text = Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join('\n');
 
-    if (!FORM_ENDPOINT) {
+    if (!WEBAPP_URL) {
       window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
       showMailAlert(alertEl);
       return true;
@@ -276,17 +275,21 @@
 
     submitBtn.disabled = true;
     try {
-      const res = await fetch(FORM_ENDPOINT, {
+      // text/plain = "einfache" Anfrage ohne CORS-Preflight, die Apps Script annimmt. Die Antwort
+      // (JSON) ist lesbar, so wissen wir, ob die Bestellung wirklich im Sheet bzw. die Mail raus ist.
+      const res = await fetch(WEBAPP_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        // _gotcha = Honeypot gegen Spam-Bots (Formspree verwirft Einsendungen, bei denen das Feld gefüllt ist)
-        body: JSON.stringify({ _subject: subject, _gotcha: '', ...fields })
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ token: WEBAPP_TOKEN, subject, summary: text, ...data })
       });
       if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      const result = await res.json();
+      if (!result.ok) { throw new Error(result.error || 'Web-App meldet Fehler'); }
       showAlert(alertEl, okText, false);
       form.reset();
       return true;
     } catch (err) {
+      console.warn('Formular konnte nicht gesendet werden:', err);
       showAlert(alertEl, t('Das Senden hat leider nicht geklappt. Bitte versuch es nochmals oder schreib uns direkt an {email}.').replace('{email}', CONTACT_EMAIL), true);
       return false;
     } finally {
@@ -307,6 +310,7 @@
       alertEl: formAlert,
       subject: `Nachricht von ${name} über die Strongnoodles-Website`,
       fields: { Name: name, 'E-Mail': email, Nachricht: message },
+      data: { type: 'contact', name, email, message },
       okText: t('Danke für deine Nachricht! Wir melden uns so bald wie möglich.')
     });
   });
@@ -416,27 +420,13 @@
   document.getElementById('qtyMinus').addEventListener('click', () => changeQty(-1));
   document.getElementById('qtyPlus').addEventListener('click', () => changeQty(1));
 
-  // Schickt die Bestellung ans Google Sheet. "Fire and forget": niemand wartet darauf, Fehler landen nur in
-  // der Konsole. no-cors + text/plain = "einfache" Anfrage ohne CORS-Preflight; die Antwort ist dafür
-  // nicht lesbar, Erfolg also nur im Sheet bzw. im Ausführungsprotokoll von Apps Script sichtbar.
-  function sendOrderToSheet(order) {
-    if (!ORDER_SHEET_URL) { return; }
-    fetch(ORDER_SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ token: ORDER_SHEET_TOKEN, ...order })
-    }).catch((err) => { console.warn('Bestellung konnte nicht ins Google Sheet geschrieben werden:', err); });
-  }
-
   orderForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const val = (id) => document.getElementById(id).value.trim();
     const qty = currentQty();
     const note = val('orderNote');
-    // Jetzt auslesen: nach erfolgreichem Senden leert submitForm() das Formular.
     const sheetOrder = {
-      name: val('orderName'), email: val('orderEmail'), street: val('orderStreet'),
+      type: 'order', name: val('orderName'), email: val('orderEmail'), street: val('orderStreet'),
       zip: val('orderZip'), city: val('orderCity'), qty, note
     };
 
@@ -457,12 +447,9 @@
         'E-Mail': val('orderEmail'),
         ...(note ? { Bemerkung: note } : {})
       },
+      data: sheetOrder,
       okText: t('Danke für deine Bestellung! Wir melden uns mit den Lieferdetails und den TWINT-Infos.')
-    }).then((ok) => {
-      updateTotal();
-      // Erst nach erfolgreichem Formspree-Versand, sonst gäbe es bei einem erneuten Versuch Doppelzeilen.
-      if (ok && FORM_ENDPOINT) { sendOrderToSheet(sheetOrder); }
-    });
+    }).then(() => { updateTotal(); });
   });
 
   // ---------- Bewertungen (Supabase) ----------

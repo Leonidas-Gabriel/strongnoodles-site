@@ -1,16 +1,22 @@
 # Bestellungen ins Google Sheet (Apps Script)
 
-Jede Bestellung auf der Website geht wie bisher per Formspree als Mail an uns. Zusätzlich schickt die Website sie
-an eine kleine Google-Apps-Script-Web-App, die sie als neue Zeile ins Blatt **Bestellungen** des Kundenregisters
-schreibt. Einmalige Einrichtung, ca. 15 Minuten.
+Bestell- und Kontaktformular der Website gehen an eine kleine Google-Apps-Script-Web-App. Sie schreibt Bestellungen
+als neue Zeile ins Blatt **Bestellungen** des Kundenregisters und schickt uns zu jeder Bestellung und jeder
+Kontaktnachricht eine Mail an info@strongnoodles.ch. Einmalige Einrichtung, ca. 15 Minuten.
 
 So läuft es ab:
-1. Kunde schickt das Bestellformular ab, die Website sendet es an Formspree.
-2. Erst wenn Formspree «ok» meldet, schickt die Website die Bestellung zusätzlich an die Web-App (im Hintergrund,
-   der Kunde wartet nicht darauf und merkt bei einem Fehler nichts).
-3. Die Web-App (`google-sheet/Code.gs`) prüft Token und Eingaben, sucht die erste Zeile mit leerer Bestell-Nr.
+1. Kunde schickt das Bestellformular ab, die Website sendet es an die Web-App und wartet auf deren Antwort.
+2. Die Web-App (`google-sheet/Code.gs`) prüft Token und Eingaben, sucht die erste Zeile mit leerer Bestell-Nr.
    und schreibt dort Datum, neue Nummer (SN-001, SN-002, ...), Kundendaten, «Nein», «Neu» und die Bemerkung.
    Spalte I (Formel), L und M werden nie angefasst.
+3. Danach schickt sie eine Mail «Neue Bestellung SN-...» an info@strongnoodles.ch (Antworten gehen direkt an den
+   Kunden). Klappt die Mail nicht, steht die Bestellung trotzdem im Sheet.
+4. Erst wenn die Web-App «ok» meldet, sieht der Kunde die Danke-Meldung. Sonst sieht er eine Fehlermeldung mit
+   unserer Mail-Adresse.
+5. Kontaktnachrichten (type «contact») landen nicht im Sheet, sondern nur als Mail an info@strongnoodles.ch.
+
+Die Mails verschickt Google über das Konto, das die Web-App bereitstellt (Limit bei einem normalen Gmail-Konto:
+100 Mails pro Tag). Beim ersten Mal muss das Konto das erlauben, siehe Abschnitt 2, Schritt 5.
 
 Tipp: Alles mit dem gemeinsamen Strongnoodles-Google-Konto machen, nicht mit einem privaten. Die Web-App läuft
 später unter dem Konto, das sie bereitstellt.
@@ -35,17 +41,21 @@ später unter dem Konto, das sie bereitstellt.
      Das ist normal bei eigenen Scripts.
    - Unten im Ausführungsprotokoll sollte `{"ok":true,"orderNo":"SN-001",...}` stehen und im Sheet eine Testzeile.
    - Testzeile wieder leeren (siehe «Testzeilen entfernen» unten).
+5. Funktion `testContact` wählen und **Ausführen**. Google fragt jetzt zusätzlich nach «E-Mails in Ihrem Namen
+   senden»: gleich wie oben **Zulassen**. Ohne diese Erlaubnis kommen keine Mails, und das Kontaktformular meldet
+   einen Fehler. Im Protokoll sollte `{"ok":true}` stehen und bei info@strongnoodles.ch eine Testmail ankommen.
+   Auch `testDoPost` schickt jetzt eine Mail «Neue Bestellung SN-...».
 
 ## 3. Als Web-App bereitstellen
 1. Oben rechts **Bereitstellen → Neue Bereitstellung**.
 2. Beim Zahnrad neben «Typ auswählen» **Web-App** wählen.
 3. Beschreibung: z. B. `v1`. **Ausführen als: Ich** (dein Konto). **Zugriff: Jeder**.
 4. **Bereitstellen** klicken und die **Web-App-URL** kopieren (endet auf `/exec`).
-5. In `app.js` ganz oben bei `ORDER_SHEET_URL` einfügen:
+5. In `app.js` ganz oben bei `WEBAPP_URL` einfügen:
    ```js
-   const ORDER_SHEET_URL = 'https://script.google.com/macros/s/.../exec';
+   const WEBAPP_URL = 'https://script.google.com/macros/s/.../exec';
    ```
-   `ORDER_SHEET_TOKEN` in `app.js` und `TOKEN` in `Code.gs` müssen gleich sein. Wenn ihr es ändert, an beiden Orten.
+   `WEBAPP_TOKEN` in `app.js` und `TOKEN` in `Code.gs` müssen gleich sein. Wenn ihr es ändert, an beiden Orten.
 6. In `index.html` die Zahl bei `app.js?v=` um eins erhöhen, damit Browser die neue Datei laden.
 
 «Zugriff: Jeder» heisst nur, dass jeder die URL aufrufen darf, nicht dass jemand das Sheet sehen kann. Das Sheet
@@ -78,15 +88,15 @@ angepasst werden.
 Die Seite über einen kleinen lokalen Server öffnen (nicht per Doppelklick auf index.html), z. B. in VS Code mit der
 Erweiterung «Live Server» oder im Projektordner `python -m http.server 8000` und dann http://localhost:8000.
 1. Bestellformular ausfüllen und absenden.
-2. Erwartet: Danke-Meldung sofort, Formspree-Mail kommt an, nach ein paar Sekunden neue Zeile im Sheet.
+2. Erwartet: nach ein bis drei Sekunden die Danke-Meldung, neue Zeile im Sheet und eine Mail «Neue Bestellung SN-...»
+   bei info@strongnoodles.ch.
 3. Entwicklertools (F12):
-   - **Konsole**: keine Warnung «Bestellung konnte nicht ins Google Sheet geschrieben werden».
-   - **Netzwerk**: eine Anfrage an `formspree.io` (Status 200) und danach eine an `script.google.com`. Diese zeigt
-     wegen `no-cors` keinen lesbaren Status, das ist normal. Ob sie geklappt hat, sieht man nur im Sheet.
+   - **Konsole**: keine Warnung «Formular konnte nicht gesendet werden». Falls doch, steht der Grund dahinter.
+   - **Netzwerk**: eine Anfrage an `script.google.com` mit Status 302 und danach eine an
+     `script.googleusercontent.com` mit Status 200 und der Antwort `{"ok":true,...}`.
+4. Gleich mit dem Kontaktformular: Danke-Meldung und Mail «Nachricht von ...», aber keine Zeile im Sheet.
 
-Achtung: Jeder Test schickt eine echte Formspree-Mail und zählt zum Formspree-Kontingent. Falls in Formspree
-eine Domain-Einschränkung auf strongnoodles.ch aktiv ist, schlägt Formspree lokal fehl, und dann wird
-(absichtlich) auch nichts ins Sheet geschrieben.
+Achtung: Jede Testbestellung ist eine echte Zeile im Sheet, danach wieder leeren (siehe «Testzeilen entfernen»).
 
 ### c) Nach dem Push
 1. Warten, bis GitHub Pages fertig ist (Repo → Actions bzw. 1 bis 2 Minuten).
@@ -100,15 +110,20 @@ A bis H, J bis K und N der Testzeile markieren und **Delete** drücken. Die Numm
 höchsten noch vorhandenen SN-Nummer weiter.
 
 ## 6. Es erscheint keine Zeile im Sheet: was prüfen?
-1. **Hat Formspree geklappt?** Nur dann wird ans Sheet gesendet. Kam die Mail an und zeigte die Website die Danke-Meldung?
-2. **Konsole (F12)**: Steht dort die Warnung, kam die Anfrage gar nicht bei Google an (z. B. offline, URL-Tippfehler).
-3. **`ORDER_SHEET_URL` in app.js**: gesetzt, endet auf `/exec` (nicht `/dev`), und die Seite lädt wirklich die neue
+1. **Was zeigte die Website?** Danke-Meldung = die Web-App hat «ok» gemeldet. Fehlermeldung = es ist nichts angekommen
+   oder die Web-App hat abgelehnt.
+2. **Konsole (F12)**: Die Warnung «Formular konnte nicht gesendet werden» nennt den Grund (z. B. offline,
+   URL-Tippfehler oder die Fehlermeldung der Web-App).
+3. **`WEBAPP_URL` in app.js**: gesetzt, endet auf `/exec` (nicht `/dev`), und die Seite lädt wirklich die neue
    app.js (Versionsnummer erhöht, Ctrl+F5)?
 4. **Apps Script → links «Ausführungen»**: Gibt es einen Eintrag `doPost`?
    - Kein Eintrag: Die Anfrage kam nicht an. URL prüfen, Bereitstellung mit «Zugriff: Jeder»?
    - Eintrag mit Warnung «Bestellung abgelehnt: ...»: Der Grund steht dort (z. B. «Nicht erlaubt» = Token passt
      nicht, «Blatt "Bestellungen" nicht gefunden», «Keine freie Zeile mehr»).
-   - Eintrag mit Fehler: Meldung lesen, meist fehlende Berechtigung. Dann `testDoPost` im Editor ausführen und neu zulassen.
+   - Eintrag mit Fehler: Meldung lesen, meist fehlende Berechtigung. Dann `testDoPost` und `testContact` im Editor
+     ausführen und neu zulassen.
+   - Eintrag «Bestell-Mail fehlgeschlagen»: Die Zeile steht im Sheet, nur die Mail fehlt (Berechtigung oder
+     Tageslimit von 100 Mails).
 5. **Script geändert, aber nichts passiert?** Neue Version bereitgestellt (Abschnitt 4)? Ohne das läuft die alte Version.
 6. **Richtiges Sheet?** Die Web-App schreibt in die Google-Tabelle, in der das Script angelegt wurde, nicht in die
    ursprüngliche .xlsx-Datei.
