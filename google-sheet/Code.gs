@@ -17,7 +17,7 @@ const MAX_CONTACT = { name: 100, email: 254, message: 5000 };
 
 const SHEET_NAME = 'Bestellungen';
 const FIRST_ROW = 2;   // Zeile 1 = Überschriften
-const LAST_ROW = 501;  // bis hier sind die Zeilen vorformatiert und haben die Formel in Spalte I
+const LAST_ROW = 501;  // bis hier sind die Zeilen vorformatiert und haben die Formel in Spalte I (Tarif-Formel)
 const ORDER_PREFIX = 'SN-';
 
 // Maximale Längen, damit niemand Romane ins Sheet schreibt.
@@ -25,7 +25,13 @@ const MAX_LEN = { name: 100, email: 254, street: 150, zip: 10, city: 80, note: 1
 const MAX_QTY = 999;
 
 // Spalten (1 = A)
-const COL = { date: 1, orderNo: 2, name: 3, email: 4, street: 5, zip: 6, city: 7, qty: 8, paid: 10, status: 11, note: 14 };
+const COL = { date: 1, orderNo: 2, name: 3, email: 4, street: 5, zip: 6, city: 7, qty: 8, paid: 10, status: 11, note: 14, tariff: 15 };
+
+// Tarife: Jede Bestellung bekommt in Spalte O den Tarif, der beim Bestellen aktiv war. Spalte I rechnet
+// Anzahl × Preis dieses Tarifs (Tabelle in "Einstellungen" E3:F12). So ändern sich alte Bestellungen nicht,
+// wenn ein neuer Tarif aktiv wird. Welcher Tarif aktiv ist, steht in "Einstellungen" H3.
+const SETTINGS_SHEET = 'Einstellungen';
+const ACTIVE_TARIFF_CELL = 'H3';
 
 function doPost(e) {
   let data;
@@ -75,6 +81,7 @@ function handleOrder_(data) {
   // Lock: zwei gleichzeitige Bestellungen dürfen nicht dieselbe Zeile oder Nummer bekommen.
   let row = 0;
   let orderNo = '';
+  let tariff = '';
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(20000)) {
     return json_({ ok: false, error: 'Sheet ist gerade beschäftigt, bitte nochmals versuchen' });
@@ -99,12 +106,17 @@ function handleOrder_(data) {
     }
     orderNo = ORDER_PREFIX + String(maxNo + 1).padStart(3, '0');
 
-    // Gezielt schreiben: A bis H, J bis K, N. Spalte I (Formel), L und M bleiben unangetastet.
+    // Aktiven Tarif lesen. Fehlt er, bleibt O leer und Spalte I zeigt "Tarif?", die Bestellung geht trotzdem durch.
+    const settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SETTINGS_SHEET);
+    tariff = settings ? clean_(settings.getRange(ACTIVE_TARIFF_CELL).getDisplayValue(), 50) : '';
+
+    // Gezielt schreiben: A bis H, J bis K, N und O. Spalte I (Formel), L und M bleiben unangetastet.
     sheet.getRange(row, COL.date, 1, 8).setValues([[
       new Date(), orderNo, order.name, order.email, order.street, order.zip, order.city, qty
     ]]);
     sheet.getRange(row, COL.paid, 1, 2).setValues([['Nein', 'Neu']]);
     sheet.getRange(row, COL.note).setValue(order.note);
+    sheet.getRange(row, COL.tariff).setValue(tariff);
     SpreadsheetApp.flush();
   } catch (err) {
     console.error(err);
@@ -125,6 +137,7 @@ function handleOrder_(data) {
         + 'E-Mail: ' + order.email + '\n'
         + 'Adresse: ' + order.street + ', ' + order.zip + ' ' + order.city + '\n'
         + 'Anzahl: ' + qty + '\n'
+        + 'Tarif: ' + (tariff || '(keiner aktiv, bitte in "Einstellungen" H3 setzen)') + '\n'
         + (order.note ? 'Bemerkung: ' + order.note + '\n' : '')
         + '\n---\nWie auf der Website abgeschickt:\n' + clip_(data.summary, 3000)
     });

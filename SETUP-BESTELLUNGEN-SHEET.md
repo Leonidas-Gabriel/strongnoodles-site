@@ -70,6 +70,24 @@ Wenn du `Code.gs` änderst, läuft die Web-App weiter mit der alten Version, bis
 Die URL bleibt gleich. **Nicht** «Neue Bereitstellung» wählen, das gibt eine neue URL, und dann müsste `app.js`
 angepasst werden.
 
+## Tarife (Vorbestellung, Normal, ...)
+Jede Bestellung merkt sich ihren Tarif, damit eine Preisänderung alte Bestellungen nicht verändert.
+
+- **Einstellungen E2:F12**: Tariftabelle. E2 `Tarif`, F2 `Preis pro Packung (CHF)`, ab Zeile 3 ein Tarif pro
+  Zeile, z. B. `Vorbestellung` / `7,95` und `Normal` / (Preis). Preise mit Komma eingeben.
+- **Einstellungen H3**: aktiver Tarif für neue Bestellungen (genau wie in Spalte E geschrieben). H2 = Beschriftung.
+- **Bestellungen Spalte O «Tarif»**: Die Web-App schreibt dort den Tarif aus H3 hinein. Von Hand eingetragene
+  Bestellungen bekommen den Tarif von Hand.
+- **Bestellungen Spalte I** rechnet Anzahl × Preis des Tarifs aus Spalte O:
+  ```
+  =IF(H2="";"";IFERROR(IF(VLOOKUP(O2;Einstellungen!$E$3:$F$12;2;FALSE)="";"";H2*VLOOKUP(O2;Einstellungen!$E$3:$F$12;2;FALSE));"Tarif?"))
+  ```
+  Leer = noch kein Preis für diesen Tarif. «Tarif?» = Spalte O leer oder Tarif nicht in der Tabelle.
+
+Preis ändern: **nicht** den Preis eines bestehenden Tarifs überschreiben, sondern eine neue Zeile mit neuem
+Tarifnamen anlegen und H3 darauf umstellen. Nur wenn ein Tarif noch keinen Preis hat (z. B. «Normal» vor dem
+Festlegen), einfach den Preis eintragen: dann rechnen alle Bestellungen mit diesem Tarif automatisch.
+
 ## 5. Testplan
 
 ### a) Script direkt testen
