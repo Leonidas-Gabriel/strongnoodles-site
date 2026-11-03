@@ -23,7 +23,7 @@
     tr: { locale: 'tr-TR' }
   };
   const LANG_KEY = 'snLang';
-  const I18N_VERSION = '5';
+  const I18N_VERSION = '6';
   const I18N_ATTRS = ['aria-label', 'placeholder', 'title', 'alt', 'data-mail-text'];
   const LETTER = /\p{L}/u;
   let currentLang = 'de';
@@ -316,7 +316,7 @@
   });
 
   // ---------- Proteinrechner ----------
-  const PROTEIN_PER_100G_PASTA = 35; // g Protein pro 100 g Strongnoodles (laut Nährwerttabelle)
+  const PROTEIN_PER_100G_PASTA = 33; // g Protein pro 100 g Strongnoodles (laut Nährwerttabelle)
 
   const calcAgeInput = document.getElementById('calcAge');
   const calcGenderInput = document.getElementById('calcGender');
