@@ -23,7 +23,7 @@
     tr: { locale: 'tr-TR' }
   };
   const LANG_KEY = 'snLang';
-  const I18N_VERSION = '4';
+  const I18N_VERSION = '5';
   const I18N_ATTRS = ['aria-label', 'placeholder', 'title', 'alt', 'data-mail-text'];
   const LETTER = /\p{L}/u;
   let currentLang = 'de';
@@ -393,7 +393,7 @@
   const orderQty = document.getElementById('orderQty');
 
   // Einzige Quelle für Preise: alle Stellen mit data-price / data-shipping / data-payment werden daraus befüllt.
-  const PRICE_CENTS = 795; // CHF 7.95 pro Packung
+  const PRICE_CENTS = 900; // CHF 9.00 pro Packung
   const SHIPPING_TEXT = 'werden später festgelegt'; // Lieferkosten (Plural) stehen noch nicht fest
   const PAYMENT_METHOD = 'TWINT';
   const orderTotal = document.getElementById('orderTotal');
