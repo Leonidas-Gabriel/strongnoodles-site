@@ -23,7 +23,7 @@
     tr: { locale: 'tr-TR' }
   };
   const LANG_KEY = 'snLang';
-  const I18N_VERSION = '6';
+  const I18N_VERSION = '7';
   const I18N_ATTRS = ['aria-label', 'placeholder', 'title', 'alt', 'data-mail-text'];
   const LETTER = /\p{L}/u;
   let currentLang = 'de';
