@@ -1171,3 +1171,439 @@
   .rev-login { margin-top: 1rem; }
   .rev-admin-on { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; font-weight: 800; }
   #revAdminBox[hidden], .rev-admin-on[hidden], .rev-more[hidden] { display: none; }
+
+  /* =====================================================================
+     REDESIGN 2026-11: Statement-Headlines, Hero-Auftritt, Scroll-Story,
+     Einblend-Animationen, FAQ. Alles respektiert "Bewegung reduzieren".
+     ===================================================================== */
+
+  /* ---------- STATEMENT-HEADLINES (zweite Zeile rot) ---------- */
+  .statement {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(2.4rem, 5.4vw, 4.4rem);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    margin: 5rem 0 0;
+    overflow-wrap: break-word;
+  }
+  .statement span { display: block; }
+  .statement span + span { color: var(--tomato); }
+  .statement-center { text-align: center; }
+  .statement + .features { padding-top: 3rem; }
+
+  /* ---------- HERO-AUFTRITT ---------- */
+  .hero h1 .w { display: inline-block; }
+  .intro .hero h1:not(.split) { opacity: 0; }
+  .hero h1 .w-last { color: var(--tomato); }
+  .intro .hero h1 .w {
+    animation: wordIn 0.75s cubic-bezier(0.2, 0.9, 0.25, 1.15) backwards;
+    animation-delay: calc(var(--i, 0) * 85ms + 120ms);
+  }
+  @keyframes wordIn { from { opacity: 0; transform: translateY(0.55em) rotate(7deg) scale(0.92); } }
+  .intro .hero p.lead { animation: revealUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.55s backwards; }
+  .intro .hero .cta-row { animation: revealUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.7s backwards; }
+  .intro .hero .art { animation: artPop 0.95s cubic-bezier(0.3, 1.45, 0.5, 1) 0.3s backwards; }
+  @keyframes artPop { from { opacity: 0; transform: scale(0.55) rotate(-14deg); } }
+  .intro .bolt { animation: boltIn 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+  .intro .bolt-1 { animation-delay: 0.85s; }
+  .intro .bolt-2 { animation-delay: 0.97s; }
+  .intro .bolt-3 { animation-delay: 1.09s; }
+  @keyframes boltIn { from { opacity: 0; transform: translateY(-46px) scale(0.3) rotate(-30deg); } }
+  .intro .sticker { animation: stickerIn 0.6s cubic-bezier(0.3, 1.7, 0.5, 1) 1.15s backwards, stickerWob 4s ease-in-out 1.75s infinite alternate; }
+  @keyframes stickerIn { from { opacity: 0; transform: scale(0.2) rotate(-90deg); } }
+
+  /* Maus-Parallax: Blitze und Sticker liegen auf verschiedenen Ebenen (Werte setzt app.js) */
+  .hero .bolt, .hero .sticker {
+    translate: calc(var(--px, 0) * var(--depth, 20px)) calc(var(--py, 0) * var(--depth, 20px));
+    transition: translate 0.25s ease-out;
+  }
+  .hero .bolt-1 { --depth: 38px; }
+  .hero .bolt-2 { --depth: -30px; }
+  .hero .bolt-3 { --depth: 26px; }
+  .hero .sticker { --depth: -18px; }
+
+  /* ---------- EINBLENDEN BEIM SCROLLEN ---------- */
+  @keyframes revealUp { from { opacity: 0; transform: translateY(36px) rotate(-1deg); } }
+  .statement.reveal.in { animation: none; }
+  .statement.reveal.in span { animation: lineIn 0.8s cubic-bezier(0.2, 0.85, 0.2, 1) backwards; }
+  .statement.reveal.in span + span { animation-delay: 0.14s; }
+  @keyframes lineIn { from { opacity: 0; transform: translateX(-46px) skewX(-10deg); } }
+  .statement-center.reveal.in span { animation-name: lineInUp; }
+  @keyframes lineInUp { from { opacity: 0; transform: translateY(40px) scale(0.96); } }
+  .section-head.reveal.in .eyebrow { animation: stamp 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) 0.12s backwards; }
+  @keyframes stamp { from { opacity: 0; transform: rotate(-14deg) scale(1.7); } }
+
+  /* ---------- SCROLL-STORY: die Packung füllt sich ---------- */
+  .story { padding: 1rem 0 3rem; }
+  .story-hint { color: var(--ink-soft); max-width: 46ch; margin: 1.1rem 0 0; font-size: 1.05rem; }
+  .story-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3rem;
+    margin-top: 1rem;
+  }
+  .story-visual {
+    position: sticky;
+    top: 84px;
+    align-self: start;
+    height: calc(100vh - 110px);
+    min-height: 460px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pack-wrap { position: relative; width: min(100%, 270px); aspect-ratio: 260 / 400; margin-right: 7rem; transform-origin: 50% 100%; }
+  .pack { width: 100%; height: 100%; overflow: visible; transform-origin: 50% 100%; }
+  .pack-front { fill: url(#kraft); stroke: var(--ink); stroke-width: 4.5; }
+  .pack-fold { fill: #B48A55; stroke: var(--ink); stroke-width: 4.5; stroke-linejoin: round; }
+  .pack-crease { fill: none; stroke: #94703F; stroke-width: 2; }
+  .pack-side { fill: #A47A48; stroke: var(--ink); stroke-width: 4.5; stroke-linejoin: round; }
+  .pack-side-top { fill: #8F6A3C; stroke: var(--ink); stroke-width: 4.5; stroke-linejoin: round; }
+  .pack-side-lines { stroke: #7E5D33; stroke-width: 2.5; stroke-linecap: round; }
+  .pack-sticker { fill: #F3E2BC; stroke: var(--ink); stroke-width: 4; }
+  .pack-brand { font-family: var(--display); font-style: italic; font-size: 17px; letter-spacing: 0.5px; fill: #141414; }
+  .pack-brand-y { fill: var(--durum); stroke: #141414; stroke-width: 3px; paint-order: stroke; }
+  .pack-window-bg { fill: #FFF8E6; }
+  .pack-window { fill: none; stroke: var(--ink); stroke-width: 4; }
+  .pack-shine { fill: none; stroke: #FFFFFF; stroke-width: 6; stroke-linecap: round; opacity: 0.65; }
+  .pack-claim { font-family: var(--display); font-style: italic; font-size: 30px; fill: #141414; }
+  .pack-claim-y { fill: var(--durum); stroke: #141414; stroke-width: 3px; paint-order: stroke; }
+  .layer { transform-box: fill-box; transform-origin: 50% 100%; }
+
+  .pack-labels { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; pointer-events: none; }
+  .pack-labels li {
+    position: absolute;
+    left: 94%;
+    top: var(--y);
+    transform: translate(8px, -50%);
+    white-space: nowrap;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    padding: 0.2rem 0.55rem;
+  }
+  .pack-labels li::before { content: ''; position: absolute; right: 100%; top: 50%; width: 14px; border-top: 2px solid var(--ink); }
+  .pack-labels li b { color: var(--tomato); }
+
+  .pack-energy {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-30%, -105%) rotate(-5deg);
+    background: var(--durum);
+    color: var(--ink-fixed);
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    padding: 0.3rem 0.9rem 0.4rem;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 2;
+  }
+  .pack-energy b { display: block; font-family: var(--display); font-style: italic; font-weight: 400; font-size: 1.6rem; line-height: 1.1; }
+  .pack-energy > span { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .pack-stamp {
+    position: absolute;
+    left: -9%;
+    top: 47%;
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: var(--tomato);
+    color: #FFFFFF;
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.05;
+    transform: rotate(-14deg);
+    z-index: 2;
+  }
+  .pack-stamp b { font-family: var(--display); font-style: italic; font-weight: 400; font-size: 1.45rem; }
+  .pack-stamp span { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* Dampf über der Packung (Schritt "Ab in den Topf") */
+  .pack-steam { position: absolute; left: 28%; top: -24%; width: 44%; height: 24%; display: flex; justify-content: space-around; pointer-events: none; opacity: 0; }
+  .pack-steam i {
+    width: 14px;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='40' viewBox='0 0 14 40'%3E%3Cpath d='M7 0 Q13 10 7 20 T7 40' fill='none' stroke='%23A89F8C' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E") repeat-y;
+    background-size: 14px 40px;
+  }
+  .pack-scale {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2rem;
+    margin: 0;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* Rigatoni, die beim Füllen oben in die Packung fallen */
+  .pack-drops { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .drop {
+    position: absolute;
+    left: var(--x);
+    top: -22%;
+    width: 38px;
+    height: 18px;
+    opacity: 0;
+    animation: dropIn var(--t, 0.85s) cubic-bezier(0.45, 0, 0.9, 0.55) var(--delay, 0s) forwards;
+  }
+  @keyframes dropIn {
+    0% { opacity: 0; transform: translateY(0) rotate(var(--r0)); }
+    12% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(var(--fall, 110px)) rotate(var(--r1)); }
+  }
+
+  .story-steps { list-style: none; margin: 0; padding: 14vh 0 18vh; }
+  .story-step {
+    min-height: 66vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 32rem;
+  }
+  .step-no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.7rem;
+    height: 2.7rem;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--durum);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.05rem;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  .story-step h3 {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(2rem, 3.6vw, 3rem);
+    line-height: 1.05;
+    margin: 0;
+  }
+  .step-value {
+    font-family: var(--display);
+    font-style: italic;
+    color: var(--tomato);
+    font-size: clamp(2.6rem, 5vw, 4.1rem);
+    line-height: 1;
+    margin: 0.35rem 0 0.9rem;
+  }
+  .story-step p:not(.step-value) { color: var(--ink-soft); font-size: 1.08rem; margin: 0; max-width: 40ch; }
+  .step-cta { margin-top: 1.7rem; align-self: flex-start; }
+
+  /* Animierter Zustand nur mit JavaScript (Klasse auf <html>); ohne JS ist alles gefüllt und sichtbar */
+  .story-anim .pack { animation: packSway 5s ease-in-out infinite alternate; }
+  @keyframes packSway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+  .story-anim .pack-wrap.bump { animation: packBump 0.55s ease; }
+  @keyframes packBump { 30% { transform: scale(1.05, 0.95); } 65% { transform: scale(0.98, 1.03); } }
+  .story-anim .layer { transform: scaleY(0); transition: transform 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s; }
+  .story-anim .layer.on { transform: scaleY(1); }
+  .story-anim .pack-labels li { opacity: 0; transform: translate(26px, -50%); transition: opacity 0.4s ease 0.55s, transform 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 0.55s; }
+  .story-anim .pack-labels li.on { opacity: 1; transform: translate(8px, -50%); }
+  .story-anim .pack-energy { opacity: 0; transform: translate(-30%, -105%) scale(0.4) rotate(-25deg); transition: opacity 0.3s ease, transform 0.55s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .story-anim .pack-energy.on { opacity: 1; transform: translate(-30%, -105%) scale(1) rotate(-5deg); }
+  .story-anim .pack-stamp { opacity: 0; transform: rotate(-40deg) scale(2.6); transition: opacity 0.15s ease, transform 0.45s cubic-bezier(0.5, 1.8, 0.5, 1); }
+  .story-anim .pack-stamp.on { opacity: 1; transform: rotate(-14deg) scale(1); }
+  .story-anim .pack-steam { transition: opacity 0.6s ease; }
+  .story-anim .pack-steam.on { opacity: 1; }
+  .story-anim .pack-steam.on i { animation: steam 2.2s linear infinite; }
+  .story-anim .pack-steam.on i:nth-child(2) { animation-delay: -0.7s; animation-duration: 2.6s; }
+  .story-anim .pack-steam.on i:nth-child(3) { animation-delay: -1.4s; }
+  @keyframes steam { from { background-position: 0 0; } to { background-position: 0 -40px; } }
+  .story-anim .story-step { opacity: 0.25; transition: opacity 0.45s ease; }
+  .story-anim .story-step.active { opacity: 1; }
+  .story-anim .story-step.active .step-no { background: var(--tomato); color: #FFFFFF; transform: rotate(-10deg) scale(1.1); }
+  .story-anim .story-step.active .step-value { animation: valuePop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  @keyframes valuePop { from { opacity: 0; transform: translateY(18px) scale(0.85) rotate(-3deg); } }
+
+  /* ---------- MEHR BEWEGUNG ---------- */
+  /* Schwebende Rigatoni hinter dem Hero (Scroll-Parallax über --scroll aus app.js) */
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .hero { position: relative; isolation: isolate; }
+  .hero-pasta { position: absolute; inset: 0; z-index: -1; overflow: clip; pointer-events: none; }
+  .rig {
+    position: absolute;
+    width: calc(64px * var(--s, 1));
+    height: calc(29px * var(--s, 1));
+    translate: 0 calc(var(--scroll, 0) * var(--k, -0.2) * 1px);
+    transform: rotate(var(--r, 0deg));
+    animation: rigFloat var(--dur, 7s) ease-in-out infinite alternate;
+  }
+  @keyframes rigFloat { to { transform: rotate(calc(var(--r, 0deg) + 16deg)) translateY(-16px); } }
+  .rig-1 { left: 47%; top: 4%; --r: -24deg; --s: 0.9; --k: -0.35; --dur: 6s; }
+  .rig-2 { left: 1%; top: 88%; --r: 18deg; --s: 0.75; --k: -0.15; --dur: 8s; opacity: 0.5; }
+  .rig-3 { left: 90%; top: 84%; --r: 32deg; --s: 1.1; --k: -0.45; --dur: 7s; }
+  .rig-4 { left: 44%; top: 78%; --r: -40deg; --s: 0.7; --k: -0.25; --dur: 9s; opacity: 0.7; }
+  .rig-5 { left: 30%; top: 0%; --r: 12deg; --s: 0.6; --k: -0.1; --dur: 6.5s; opacity: 0.45; }
+  .rig-6 { left: 93%; top: 22%; --r: -60deg; --s: 0.85; --k: -0.3; --dur: 7.5s; }
+  .intro .rig { animation: rigIn 0.8s cubic-bezier(0.3, 1.5, 0.5, 1) backwards, rigFloat var(--dur, 7s) ease-in-out 0.8s infinite alternate; }
+  .intro .rig-1 { animation-delay: 1.2s, 2s; }
+  .intro .rig-2 { animation-delay: 1.3s, 2.1s; }
+  .intro .rig-3 { animation-delay: 1.4s, 2.2s; }
+  .intro .rig-4 { animation-delay: 1.5s, 2.3s; }
+  .intro .rig-5 { animation-delay: 1.6s, 2.4s; }
+  .intro .rig-6 { animation-delay: 1.7s, 2.5s; }
+  @keyframes rigIn { from { opacity: 0; transform: rotate(calc(var(--r, 0deg) - 120deg)) scale(0.2); } }
+
+  /* Glanz über den roten Buttons */
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    transform: skewX(-9deg);
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.45) 48%, transparent 60%) no-repeat;
+    background-size: 260% 100%;
+    background-position: 140% 0;
+    transition: background-position 0.65s ease;
+  }
+  .btn-primary:hover::after { background-position: -40% 0; }
+
+  /* Karten kippen leicht mit der Maus (Werte setzt app.js) */
+  .tilt { transition: transform 0.25s ease-out; will-change: transform; }
+
+  /* Vorhang beim Seitenwechsel */
+  .page-wipe {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--durum);
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .page-wipe span { font-family: var(--display); font-style: italic; text-transform: uppercase; font-size: clamp(2.6rem, 9vw, 6.5rem); color: var(--ink-fixed); }
+  .page-wipe span b { font-weight: 400; color: var(--tomato); }
+  .page-wipe.run { visibility: visible; animation: wipe 0.7s cubic-bezier(0.7, 0, 0.3, 1) forwards; }
+  .page-wipe.run span { animation: wipeText 0.7s ease forwards; }
+  @keyframes wipe { 0%, 30% { clip-path: inset(0 0 0 0); } 100% { clip-path: inset(0 0 0 100%); } }
+  @keyframes wipeText { from { transform: scale(0.85) skewX(-8deg); } to { transform: scale(1.08); } }
+
+  /* ---------- FAQ ---------- */
+  .faq { padding: 1rem 0 5rem; }
+  .faq .statement { margin-top: 3rem; }
+  .faq-list { margin-top: 2.2rem; max-width: 780px; border-top: 3px solid var(--ink); }
+  .faq-item { border-bottom: 2px solid var(--line); }
+  .faq-item summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    padding: 1.15rem 0.2rem;
+    font-weight: 800;
+    font-size: 1.08rem;
+    transition: color 0.2s ease;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  /* Plus aus zwei Balken; offen wird es zum Minus auf rotem Grund */
+  .faq-item summary::after {
+    content: '';
+    flex: none;
+    width: 2.1rem;
+    height: 2.1rem;
+    --bar: var(--ink-fixed);
+    background:
+      linear-gradient(var(--bar), var(--bar)) center / 14px 3px no-repeat,
+      linear-gradient(var(--bar), var(--bar)) center / 3px 14px no-repeat,
+      var(--durum);
+    border: 2.5px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: skewX(-9deg);
+    transition: transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.2s ease;
+  }
+  .faq-item summary:hover::after { transform: skewX(-9deg) translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+  .faq-item[open] summary::after {
+    --bar: #FFFFFF;
+    background:
+      linear-gradient(var(--bar), var(--bar)) center / 14px 3px no-repeat,
+      var(--tomato);
+    transform: skewX(-9deg) rotate(180deg);
+  }
+  .faq-item summary:hover { color: var(--tomato); }
+  .faq-item summary:focus-visible { outline: 3px solid var(--tomato); outline-offset: 3px; }
+  .faq-a { padding: 0 0.2rem 1.4rem; color: var(--ink-soft); max-width: 62ch; }
+  .faq-a p { margin: 0; }
+  .faq-a .btn { margin-top: 1.1rem; }
+  .faq-item[open] .faq-a { animation: faqIn 0.4s ease; }
+  @keyframes faqIn { from { opacity: 0; transform: translateY(-8px); } }
+  /* Weiches Auf- und Zuklappen in Browsern, die es können (sonst springt es einfach auf) */
+  @supports (interpolate-size: allow-keywords) {
+    .faq { interpolate-size: allow-keywords; }
+    .faq-item::details-content { block-size: 0; overflow: clip; transition: block-size 0.38s ease, content-visibility 0.38s allow-discrete; }
+    .faq-item[open]::details-content { block-size: auto; }
+  }
+
+  /* ---------- MOBILE ---------- */
+  @media (max-width: 860px) {
+    .statement { margin-top: 3.5rem; }
+    .story-grid { grid-template-columns: 1fr; gap: 0; }
+    .story-visual {
+      top: 64px;
+      z-index: 3;
+      height: 46vh;
+      min-height: 300px;
+      background-color: var(--flour);
+      border-bottom: 3px solid var(--ink);
+      padding-top: 3.2rem;
+      padding-bottom: 2.2rem;
+      /* bis an den Bildschirmrand, damit nichts seitlich unter der Packung hervorschaut */
+      margin-inline: -32px;
+      padding-inline: 32px;
+    }
+    .pack-wrap { width: auto; height: 100%; margin-right: 6.5rem; }
+    .pack-stamp { width: 70px; height: 70px; }
+    .pack-energy { left: 4%; top: 12%; padding: 0.2rem 0.6rem 0.3rem; }
+    .pack-energy b { font-size: 1.2rem; }
+    .pack-steam { top: -10%; height: 10%; }
+    .pack-stamp b { font-size: 1.1rem; }
+    .story-steps { padding: 6vh 0 12vh; }
+    .story-step { min-height: 58vh; justify-content: flex-start; padding-top: 2.5rem; }
+  }
+  @media (max-width: 560px) {
+    .story-visual { margin-inline: -20px; padding-inline: 20px; }
+  }
+  @media (max-width: 420px) {
+    .pack-labels li { font-size: 0.64rem; padding: 0.15rem 0.4rem; }
+    .pack-wrap { margin-right: 5.6rem; }
+  }
+
+  /* ---------- WENIGER BEWEGUNG ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .intro .hero h1 .w, .intro .hero p.lead, .intro .hero .cta-row, .intro .hero .art,
+    .intro .bolt, .intro .sticker, .statement.reveal.in span, .section-head.reveal.in .eyebrow,
+    .faq-item[open] .faq-a, .rig, .page-wipe.run, .page-wipe.run span { animation: none; }
+    .rig { translate: none; }
+    .page-wipe { display: none; }
+    .btn-primary::after { transition: none; }
+    .tilt { transition: none; }
+    .hero .bolt, .hero .sticker { translate: none; transition: none; }
+    .faq-item summary::after { transition: none; }
+    .faq-item::details-content { transition: none; }
+  }

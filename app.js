@@ -754,23 +754,182 @@
 
   const heroArt = document.querySelector('.hero .art');
   if (heroArt && !reduceMotion.matches && window.matchMedia('(hover: hover)').matches) {
+    const heroEl = document.querySelector('.hero');
     document.getElementById('home').addEventListener('mousemove', (e) => {
       const x = e.clientX / window.innerWidth - 0.5;
       const y = e.clientY / window.innerHeight - 0.5;
       heroArt.style.transform = `perspective(700px) rotateY(${x * 10}deg) rotateX(${-y * 8}deg)`;
+      // Blitze und Sticker bewegen sich unterschiedlich stark mit (Tiefe steht im CSS bei --depth)
+      heroEl.style.setProperty('--px', x.toFixed(3));
+      heroEl.style.setProperty('--py', y.toFixed(3));
     });
   }
 
-  // Werbevideo: lädt nur Metadaten, läuft nur solange es sichtbar ist (und nicht bei "weniger Bewegung")
-  const promoVideo = document.getElementById('promoVideo');
-  if (promoVideo && 'IntersectionObserver' in window && !reduceMotion.matches) {
-    new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) { promoVideo.play().catch(() => {}); }
-        else { promoVideo.pause(); }
-      });
-    }, { threshold: 0.4 }).observe(promoVideo);
+  // ---------- Hero-Titel Wort für Wort ----------
+  // Läuft nach jeder Übersetzung neu, weil der Sprachwechsel den Titel ersetzt.
+  // Das Einfliegen selbst passiert nur beim ersten Laden (Klasse "intro" auf <html>, gesetzt im <head>).
+  const heroTitle = document.querySelector('.hero h1');
+  function splitHeroTitle() {
+    if (!heroTitle) { return; }
+    const words = heroTitle.textContent.trim().split(/\s+/);
+    heroTitle.textContent = '';
+    words.forEach((word, i) => {
+      const w = document.createElement('span');
+      w.className = 'w' + (i === words.length - 1 ? ' w-last' : '');
+      w.style.setProperty('--i', i);
+      w.textContent = word;
+      heroTitle.appendChild(w);
+      if (i < words.length - 1) { heroTitle.appendChild(document.createTextNode(' ')); }
+    });
+    heroTitle.classList.add('split');
   }
+  splitHeroTitle();
+  document.addEventListener('langchange', splitHeroTitle);
+  setTimeout(() => document.documentElement.classList.remove('intro'), 2600);
+
+  // ---------- Scroll-Story: die Packung füllt sich ----------
+  const story = document.getElementById('story');
+  if (story && 'IntersectionObserver' in window && !reduceMotion.matches) {
+    document.documentElement.classList.add('story-anim');
+    const steps = [...story.querySelectorAll('.story-step')];
+    const layers = [...story.querySelectorAll('.layer')];
+    const labels = [...story.querySelectorAll('.pack-labels li')];
+    const energy = story.querySelector('.pack-energy');
+    const energyNum = story.querySelector('[data-energy]');
+    const stamp = story.querySelector('.pack-stamp');
+    const steam = story.querySelector('.pack-steam');
+    const packWrap = story.querySelector('.pack-wrap');
+    const drops = story.querySelector('.pack-drops');
+    const ENERGY_KCAL = 351;
+    const ENERGY_STEP = 5;
+    const COOK_STEP = 6;
+    let active = 0;
+
+    const countEnergy = () => {
+      const start = performance.now();
+      (function tick(now) {
+        const p = Math.min(1, (now - start) / 900);
+        energyNum.textContent = Math.round(ENERGY_KCAL * (1 - Math.pow(1 - p, 3)));
+        if (p < 1 && active >= ENERGY_STEP) { requestAnimationFrame(tick); }
+      })(start);
+    };
+
+    // Ein paar Rigatoni fallen oben in die Packung, die Packung federt kurz
+    const dropPasta = (count) => {
+      const fall = packWrap.offsetHeight * 0.3;
+      for (let i = 0; i < count; i++) {
+        const d = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        d.setAttribute('class', 'drop');
+        d.setAttribute('viewBox', '0 0 62 28');
+        d.innerHTML = '<use href="#rig"/>';
+        d.style.cssText = `--x:${22 + Math.random() * 40}%;--delay:${i * 0.09}s;--t:${0.7 + Math.random() * 0.3}s;--r0:${Math.random() * 360}deg;--r1:${Math.random() * 360}deg;--fall:${fall}px`;
+        d.addEventListener('animationend', () => d.remove());
+        drops.appendChild(d);
+      }
+      packWrap.classList.remove('bump');
+      void packWrap.offsetWidth;
+      packWrap.classList.add('bump');
+    };
+
+    const setActive = (n) => {
+      if (n === active) { return; }
+      const prev = active;
+      active = n;
+      steps.forEach((s, i) => s.classList.toggle('active', i + 1 === n));
+      layers.forEach((l) => l.classList.toggle('on', Number(l.dataset.layer) <= n));
+      labels.forEach((l) => l.classList.toggle('on', Number(l.dataset.label) <= n));
+      energy.classList.toggle('on', n >= ENERGY_STEP);
+      stamp.classList.toggle('on', n >= COOK_STEP);
+      steam.classList.toggle('on', n >= COOK_STEP);
+      if (n > prev && n <= layers.length) { dropPasta(n === 1 ? 7 : 5); }
+      if (n >= ENERGY_STEP && prev < ENERGY_STEP) { countEnergy(); }
+      if (n >= COOK_STEP && prev < COOK_STEP) { packWrap.classList.remove('bump'); void packWrap.offsetWidth; packWrap.classList.add('bump'); }
+    };
+
+    // Aktiv ist der Schritt, der gerade die Bildschirmmitte kreuzt (Handy: weiter unten, weil oben die Packung klebt)
+    const stepObserver = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { setActive(Number(en.target.dataset.step)); } });
+    }, { rootMargin: window.matchMedia('(max-width: 860px)').matches ? '-72% 0px -24% 0px' : '-45% 0px -45% 0px' });
+    steps.forEach((s) => stepObserver.observe(s));
+
+    // Ganz nach oben gescrollt: Packung wieder leeren, damit sie beim nächsten Mal neu füllt
+    const resetObserver = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting && en.boundingClientRect.top > 0) { setActive(0); }
+      });
+    }, { threshold: 0.9 });
+    resetObserver.observe(story.querySelector('.story-intro'));
+  }
+
+  // ---------- Bewegung beim Scrollen ----------
+  // Ein einziger rAF-Loop: Rigatoni-Parallax im Hero, Laufband nach Scroll-Tempo,
+  // Statement-Zeilen driften auseinander, das Video zoomt beim Reinscrollen auf.
+  if (!reduceMotion.matches) {
+    const heroPasta = document.querySelector('.hero-pasta');
+    const marqueeAnims = () => [...document.querySelectorAll('.marquee-track')].flatMap((el) => el.getAnimations());
+    const promoFig = document.querySelector('.promo-video');
+    let lastY = window.scrollY;
+    let speed = 0;
+    let ticking = false;
+
+    const frame = () => {
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+      speed = speed * 0.88 + Math.abs(y - lastY) * 0.12;
+      lastY = y;
+
+      if (heroPasta) { heroPasta.style.setProperty('--scroll', Math.min(y, 1400).toFixed(0)); }
+      marqueeAnims().forEach((a) => { a.playbackRate = 1 + Math.min(speed * 0.35, 6); });
+
+      document.querySelectorAll('.page.active .statement').forEach((st) => {
+        const r = st.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) { return; }
+        const p = (r.top + r.height / 2 - vh / 2) / vh;
+        const [a, b] = st.children;
+        if (a) { a.style.translate = `${(p * -46).toFixed(1)}px 0`; }
+        if (b) { b.style.translate = `${(p * 46).toFixed(1)}px 0`; }
+      });
+
+      if (promoFig && promoFig.offsetParent) {
+        const r = promoFig.getBoundingClientRect();
+        const t = Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.75)));
+        promoFig.style.scale = (0.84 + 0.16 * t).toFixed(3);
+        promoFig.style.rotate = `${((1 - t) * -3).toFixed(2)}deg`;
+      }
+
+      if (speed > 0.05) { requestAnimationFrame(frame); } else { ticking = false; }
+    };
+    const kick = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
+    window.addEventListener('scroll', kick, { passive: true });
+    window.addEventListener('resize', kick);
+    document.addEventListener('pageshown', () => setTimeout(kick, 60));
+    kick();
+  }
+
+  // ---------- Karten kippen mit der Maus ----------
+  if (!reduceMotion.matches && window.matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll('.feature, .member, .stat').forEach((card) => {
+      card.classList.add('tilt');
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(800px) rotateY(${(x * 10).toFixed(2)}deg) rotateX(${(-y * 10).toFixed(2)}deg) translateY(-4px)`;
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+  }
+
+  // ---------- Vorhang beim Seitenwechsel ----------
+  // Der erste Seitenaufruf beim Laden passiert, bevor dieser Listener existiert: hier kommen nur echte Wechsel an
+  const pageWipe = document.querySelector('.page-wipe');
+  document.addEventListener('pageshown', () => {
+    if (!pageWipe || reduceMotion.matches) { return; }
+    pageWipe.classList.remove('run');
+    void pageWipe.offsetWidth;
+    pageWipe.classList.add('run');
+  });
+  if (pageWipe) { pageWipe.addEventListener('animationend', (e) => { if (e.target === pageWipe) { pageWipe.classList.remove('run'); } }); }
 
   if ('IntersectionObserver' in window && !reduceMotion.matches) {
     const io = new IntersectionObserver((entries) => {
@@ -778,7 +937,7 @@
         if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
       });
     }, { threshold: 0.12 });
-    document.querySelectorAll('.feature, .member, .nutrition-card, .tl-item, .legal-content, .calc-form, .calc-result, .contact-grid > div').forEach((el, i) => {
+    document.querySelectorAll('.feature, .member, .nutrition-card, .tl-item, .legal-content, .calc-form, .calc-result, .contact-grid > div, .section-head, .statement, .stat, .promo-video, .story-hint, .faq-item, .info-block, .group-photo').forEach((el, i) => {
       el.classList.add('reveal');
       el.style.setProperty('--d', (i % 3) * 90 + 'ms');
       io.observe(el);

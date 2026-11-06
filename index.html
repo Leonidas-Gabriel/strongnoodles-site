@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>(function(){try{var d=document.documentElement;if(localStorage.getItem('snTheme')==='dark'){d.setAttribute('data-theme','dark');}var l=localStorage.getItem('snLang');if(l&&l!=='de'){d.classList.add('i18n-pending');setTimeout(function(){d.classList.remove('i18n-pending');},3000);}}catch(e){}})();</script>
+<script>(function(){var r=document.documentElement;if(window.matchMedia&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){r.classList.add('intro');setTimeout(function(){r.classList.remove('intro');},3000);}try{var d=document.documentElement;if(localStorage.getItem('snTheme')==='dark'){d.setAttribute('data-theme','dark');}var l=localStorage.getItem('snLang');if(l&&l!=='de'){d.classList.add('i18n-pending');setTimeout(function(){d.classList.remove('i18n-pending');},3000);}}catch(e){}})();</script>
 <title>Strongnoodles – High-Protein Pasta aus Zug</title>
 <meta name="description" content="High-Protein Pasta, regional hergestellt. 33 g Protein pro 100 g mit echtem Pasta-Geschmack. Ein YES-Projekt von fünf Schüler:innen.">
 <meta name="theme-color" content="#141414">
@@ -62,13 +62,22 @@
 
 <link rel="preload" as="image" href="images/logo.webp" type="image/webp">
 <link rel="preload" as="font" type="font/woff2" href="fonts/anton-latin.woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=15">
+<link rel="stylesheet" href="styles.css?v=16">
 <noscript><style>.page{display:block !important;margin-bottom:48px}.nav-toggle{display:none}</style></noscript>
 </head>
 <body>
 
 <noscript><p style="margin:0;padding:12px 16px;background:#141414;color:#FFF9E8;text-align:center">Für die Navigation und das Bestellformular braucht diese Seite JavaScript. Bestellen kannst du auch per E-Mail an <a href="mailto:info@strongnoodles.ch" style="text-decoration:underline">info@strongnoodles.ch</a>.</p></noscript>
 <div class="progress" id="progress" aria-hidden="true"></div>
+<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+  <symbol id="rig" viewBox="0 0 62 28">
+    <rect x="3" y="4" width="50" height="20" rx="8" fill="#F2CF8A" stroke="#141414" stroke-width="2.5"/>
+    <path d="M13 6 V22 M21 6 V22 M29 6 V22 M37 6 V22 M45 6 V22" stroke="#C99642" stroke-width="2"/>
+    <ellipse cx="53" cy="14" rx="6" ry="10.5" fill="#FBE3B2" stroke="#141414" stroke-width="2.5"/>
+    <ellipse cx="53" cy="14" rx="2.8" ry="6" fill="#8A5A1E"/>
+  </symbol>
+</svg>
+<div class="page-wipe" aria-hidden="true"><span translate="no">strong<b>noodles</b></span></div>
 <a class="skip-link" href="#main" id="skipLink">Zum Inhalt springen</a>
 
 <header>
@@ -112,6 +121,14 @@
   <!-- HOME -->
   <section class="page active" id="home" tabindex="-1">
     <div class="hero">
+      <div class="hero-pasta" aria-hidden="true">
+        <svg class="rig rig-1"><use href="#rig"/></svg>
+        <svg class="rig rig-2"><use href="#rig"/></svg>
+        <svg class="rig rig-3"><use href="#rig"/></svg>
+        <svg class="rig rig-4"><use href="#rig"/></svg>
+        <svg class="rig rig-5"><use href="#rig"/></svg>
+        <svg class="rig rig-6"><use href="#rig"/></svg>
+      </div>
       <div>
         <h1>Pasta, die etwas leistet.</h1>
         <p class="lead">Proteinreich und regional hergestellt – für alle, die hart trainieren und trotzdem echte Pasta geniessen wollen. Voller Geschmack, mit echtem Biss. Und mit starken Nährwerten.</p>
@@ -161,6 +178,8 @@
       </video>
     </figure>
 
+    <h2 class="statement statement-center"><span>Mehr Protein.</span> <span>Gleicher Geschmack.</span></h2>
+
     <div class="features">
       <div class="feature">
         <div class="mark" aria-hidden="true"><svg viewBox="0 0 64 64" focusable="false"><polygon class="hex" points="32,4 57,18 57,46 32,60 7,46 7,18"/><g fill="currentColor"><rect x="14" y="22" width="6" height="20"/><rect x="44" y="22" width="6" height="20"/><rect x="9" y="27" width="4" height="10"/><rect x="51" y="27" width="4" height="10"/><rect x="20" y="30" width="24" height="4"/></g></svg></div>
@@ -179,6 +198,122 @@
       </div>
     </div>
 
+    <!-- SCROLL STORY: die Strongnoodles-Packung füllt sich beim Scrollen Schicht für Schicht.
+         Fenster = 100 g (152 px), also 1.52 px pro Gramm; Werte von der Etikette. -->
+    <section class="story" id="story" aria-labelledby="storyTitle">
+      <div class="story-intro">
+        <h2 class="statement" id="storyTitle"><span>Was drin ist.</span> <span>Schicht für Schicht.</span></h2>
+        <p class="story-hint">Scroll weiter. Die Packung füllt sich mit dem, was in 100&nbsp;g Strongnoodles steckt.</p>
+      </div>
+
+      <div class="story-grid">
+        <div class="story-visual">
+          <div class="pack-wrap">
+            <div class="pack-steam" aria-hidden="true"><i></i><i></i><i></i></div>
+            <svg class="pack" viewBox="0 0 260 400" aria-hidden="true" focusable="false">
+              <defs>
+                <clipPath id="packWindow"><rect x="56" y="190" width="124" height="152" rx="16"/></clipPath>
+                <pattern id="kraft" width="14" height="14" patternUnits="userSpaceOnUse">
+                  <rect width="14" height="14" fill="#C9A06A"/>
+                  <path d="M0 3 H6 M8 9 H14 M3 12 H9" stroke="#B88E57" stroke-width="1" opacity="0.7"/>
+                </pattern>
+                <pattern id="rigaPat" width="34" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(-22)">
+                  <rect width="34" height="24" fill="#E3B567"/>
+                  <rect x="2" y="3" width="24" height="10" rx="4" fill="#F2CF8A" stroke="#141414" stroke-width="1.4"/>
+                  <path d="M8 4 V12 M13 4 V12 M18 4 V12" stroke="#C99642" stroke-width="1.2"/>
+                  <ellipse cx="26" cy="8" rx="2.4" ry="5" fill="#8A5A1E" stroke="#141414" stroke-width="1.2"/>
+                  <rect x="12" y="15" width="20" height="8" rx="3.5" fill="#F2CF8A" stroke="#141414" stroke-width="1.4"/>
+                  <ellipse cx="32" cy="19" rx="2" ry="4" fill="#8A5A1E" stroke="#141414" stroke-width="1.2"/>
+                </pattern>
+                <pattern id="flourDots" width="12" height="12" patternUnits="userSpaceOnUse">
+                  <rect width="12" height="12" fill="#FFF3D1"/>
+                  <circle cx="3" cy="3" r="1.5" fill="#E4CC8C"/><circle cx="9" cy="9" r="1.2" fill="#E4CC8C"/>
+                </pattern>
+                <pattern id="fiber" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                  <rect width="10" height="10" fill="#9C6B3A"/><rect width="3" height="10" fill="#80552B"/>
+                </pattern>
+              </defs>
+              <!-- Seitenfalte -->
+              <path class="pack-side" d="M206 58 L236 72 L234 382 L206 392 Z"/>
+              <path class="pack-side-top" d="M200 16 L232 28 L236 72 L206 58 Z"/>
+              <path class="pack-side-lines" d="M213 120 H229 M213 130 H229 M213 140 H226 M213 150 H229 M213 160 H224 M213 170 H229"/>
+              <!-- Vorderseite mit gefaltetem Rand oben -->
+              <rect class="pack-front" x="24" y="56" width="182" height="336" rx="8"/>
+              <path class="pack-fold" d="M24 58 L30 16 L200 16 L206 58 Z"/>
+              <path class="pack-crease" d="M28 30 H202 M26 44 H204"/>
+              <!-- Logo-Kleber -->
+              <circle class="pack-sticker" cx="115" cy="122" r="56"/>
+              <image href="images/logo.webp" x="76" y="76" width="78" height="57"/>
+              <text class="pack-brand" x="115" y="152" text-anchor="middle">STRONG</text>
+              <text class="pack-brand pack-brand-y" x="115" y="169" text-anchor="middle">NOODLES</text>
+              <!-- Sichtfenster: füllt sich -->
+              <rect class="pack-window-bg" x="56" y="190" width="124" height="152" rx="16"/>
+              <g clip-path="url(#packWindow)">
+                <rect class="layer" data-layer="1" x="50" y="291.84" width="136" height="50.16" fill="url(#rigaPat)"/>
+                <rect class="layer" data-layer="2" x="50" y="218.88" width="136" height="72.96" fill="url(#flourDots)"/>
+                <rect class="layer" data-layer="3" x="50" y="209.76" width="136" height="9.12" fill="url(#fiber)"/>
+                <rect class="layer" data-layer="4" x="50" y="206.72" width="136" height="3.04" fill="#CC2427"/>
+              </g>
+              <rect class="pack-window" x="56" y="190" width="124" height="152" rx="16"/>
+              <path class="pack-shine" d="M70 206 L70 252"/>
+              <text class="pack-claim" x="115" y="378" text-anchor="middle">HIGH <tspan class="pack-claim-y">PROTEIN</tspan></text>
+            </svg>
+            <div class="pack-drops" aria-hidden="true"></div>
+            <ul class="pack-labels" aria-hidden="true">
+              <li data-label="1" style="--y: 79.2%"><b>33&nbsp;g</b> Protein</li>
+              <li data-label="2" style="--y: 63.8%"><b>48&nbsp;g</b> Kohlenhydrate</li>
+              <li data-label="3" style="--y: 56%"><b>6&nbsp;g</b> Ballaststoffe</li>
+              <li data-label="4" style="--y: 48%"><b>2&nbsp;g</b> Fett</li>
+            </ul>
+            <div class="pack-energy" aria-hidden="true"><b translate="no"><span data-energy>0</span>&nbsp;kcal</b><span>pro 100&nbsp;g</span></div>
+            <div class="pack-stamp" aria-hidden="true"><b translate="no">400&nbsp;g</b><span>Rigatoni</span></div>
+            <p class="pack-scale" aria-hidden="true">Fenster = 100&nbsp;g</p>
+          </div>
+        </div>
+
+        <ol class="story-steps">
+          <li class="story-step" data-step="1">
+            <span class="step-no" aria-hidden="true">01</span>
+            <h3>Protein</h3>
+            <p class="step-value" translate="no">33&nbsp;g</p>
+            <p>Der Hauptdarsteller. Ein Drittel jeder Portion ist Protein, dank Erbsenprotein, Weizengluten und Kichererbsenmehl.</p>
+          </li>
+          <li class="story-step" data-step="2">
+            <span class="step-no" aria-hidden="true">02</span>
+            <h3>Kohlenhydrate</h3>
+            <p class="step-value" translate="no">48&nbsp;g</p>
+            <p>Damit es Pasta bleibt. Hartweizen sorgt für Biss und Geschmack wie gewohnt.</p>
+          </li>
+          <li class="story-step" data-step="3">
+            <span class="step-no" aria-hidden="true">03</span>
+            <h3>Ballaststoffe</h3>
+            <p class="step-value" translate="no">6&nbsp;g</p>
+            <p>Ein schöner Nebeneffekt: 6&nbsp;g Ballaststoffe in jeden 100&nbsp;g.</p>
+          </li>
+          <li class="story-step" data-step="4">
+            <span class="step-no" aria-hidden="true">04</span>
+            <h3>Fett</h3>
+            <p class="step-value" translate="no">2&nbsp;g</p>
+            <p>Kaum der Rede wert: nur 2&nbsp;g Fett pro 100&nbsp;g.</p>
+          </li>
+          <li class="story-step" data-step="5">
+            <span class="step-no" aria-hidden="true">05</span>
+            <h3>Energie</h3>
+            <p class="step-value" translate="no">351&nbsp;kcal</p>
+            <p>Alles zusammen: 351&nbsp;kcal pro 100&nbsp;g Pasta. Wie viel du davon brauchst, rechnet dir der Proteinrechner aus.</p>
+            <button type="button" class="btn btn-ghost step-cta" data-page="idea">Zum Proteinrechner</button>
+          </li>
+          <li class="story-step" data-step="6">
+            <span class="step-no" aria-hidden="true">06</span>
+            <h3>Ab in den Topf</h3>
+            <p class="step-value" translate="no">5–7&nbsp;Min.</p>
+            <p>400&nbsp;g Rigatoni pro Packung. 5 bis 7 Minuten in nicht sprudelnd kochendem Wasser garen, fertig.</p>
+            <button type="button" class="btn btn-primary step-cta" data-page="order">Jetzt bestellen</button>
+          </li>
+        </ol>
+      </div>
+    </section>
+
     <div class="nutrition-card">
       <h2>Nährwertangaben (pro 100&nbsp;g)</h2>
       <table class="nutrition-table">
@@ -186,15 +321,58 @@
           <tr><th scope="col">Nährwert</th><th scope="col">Menge</th></tr>
         </thead>
         <tbody>
-          <tr><td>Energie</td><td>360 kcal</td></tr>
+          <tr><td>Energie</td><td>351 kcal</td></tr>
           <tr class="highlight"><td>Eiweiss (Protein)</td><td>33 g</td></tr>
-          <tr><td>Kohlenhydrate</td><td>42 g</td></tr>
-          <tr><td>Fett</td><td>2.2 g</td></tr>
-          <tr><td>Ballaststoffe</td><td>6.5 g</td></tr>
+          <tr><td>Kohlenhydrate</td><td>48 g</td></tr>
+          <tr><td>Fett</td><td>2 g</td></tr>
+          <tr><td>Ballaststoffe</td><td>6 g</td></tr>
         </tbody>
       </table>
       <p class="calc-note">Massgebend sind die Angaben auf der Verpackung.</p>
     </div>
+
+    <!-- FAQ: <details> funktioniert auch ohne JavaScript und mit Tastatur -->
+    <section class="faq" aria-labelledby="faqTitle">
+      <h2 class="statement" id="faqTitle"><span>Fragen?</span> <span>Antworten.</span></h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Wie viel Protein steckt in Strongnoodles?</summary>
+          <div class="faq-a"><p>33&nbsp;g Protein pro 100&nbsp;g Pasta (trocken). Alle Nährwerte findest du oben in der Tabelle.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Was kostet eine Packung?</summary>
+          <div class="faq-a"><p>Eine Packung mit 400&nbsp;g Rigatoni kostet CHF&nbsp;9.00. Die Lieferkosten werden später festgelegt und dir separat mitgeteilt.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Was ist drin, und enthält Strongnoodles Gluten?</summary>
+          <div class="faq-a"><p>Zutaten: Hartweizenmehl, Wasser, Erbsenprotein-Isolat, Weizengluten und Kichererbsenmehl. Strongnoodles enthält also Weizen und Gluten und ist nicht glutenfrei.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie koche ich Strongnoodles?</summary>
+          <div class="faq-a"><p>5 bis 7 Minuten in nicht sprudelnd kochendem Wasser garen. Danach wie normale Pasta weiterverwenden.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie lange ist die Pasta haltbar?</summary>
+          <div class="faq-a"><p>Die aktuelle Charge ist mindestens haltbar bis 31.12.2027. Kühl, trocken und lichtgeschützt lagern.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie kann ich bezahlen?</summary>
+          <div class="faq-a"><p>Per TWINT. Nach deiner Bestellung schicken wir dir die TWINT-Infos zusammen mit den Lieferdetails per E-Mail.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie kommt die Pasta zu mir?</summary>
+          <div class="faq-a"><p>Nach deiner Bestellung melden wir uns per E-Mail und klären die Lieferung mit dir ab.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie viel Strongnoodles brauche ich pro Tag?</summary>
+          <div class="faq-a"><p>Das hängt von Alter, Gewicht und Training ab. Unser Proteinrechner rechnet es dir aus.</p><button type="button" class="btn btn-ghost" data-page="idea">Zum Proteinrechner</button></div>
+        </details>
+        <details class="faq-item">
+          <summary>Wer steckt hinter Strongnoodles?</summary>
+          <div class="faq-a"><p>Fünf Schüler:innen aus Zug, die Strongnoodles als Miniunternehmen im Programm von Young Enterprise Switzerland (YES) gegründet haben.</p><button type="button" class="btn btn-ghost" data-page="team">Zum Team</button></div>
+        </details>
+      </div>
+    </section>
   </section>
 
   <!-- TEAM -->
@@ -624,7 +802,7 @@
   <span class="clicker-label">Pasta-Clicker</span><span class="clicker-count" id="clickerCount" aria-hidden="true">0</span>
 </button>
 
-<script src="app.js?v=22" defer></script>
+<script src="app.js?v=23" defer></script>
 
 </body>
 </html>
