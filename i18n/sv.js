@@ -154,7 +154,7 @@ window.SN_I18N.sv = {
  "Semantisches HTML5 zur Unterstützung von Screenreadern.": "Semantisk HTML5 för stöd av skärmläsare.",
  "Berücksichtigung von reduzierten Bewegungseinstellungen (<code translate=\"no\">prefers-reduced-motion</code>) bei Animationen.": "Hänsyn till inställningar för begränsad rörelse (<code translate=\"no\">prefers-reduced-motion</code>) vid animeringar.",
  "Die Website funktioniert auch ohne JavaScript mit einem Hinweistext und allen Inhalten sichtbar.": "Webbplatsen fungerar även utan JavaScript, med en informationstext och allt innehåll synligt.",
- "Das Werbevideo auf der Startseite enthält nur Hintergrundmusik ohne gesprochenen Text; es sind daher keine Untertitel erforderlich.": "Reklamvideon på startsidan innehåller endast bakgrundsmusik utan talad text; därför behövs inga undertexter.",
+ "Das Werbevideo auf der Startseite hat keinen Ton. Alle Inhalte werden als Text im Bild gezeigt; es sind daher keine Untertitel erforderlich.": "Reklamvideon på startsidan har inget ljud. Allt innehåll visas som text i bild; därför behövs inga undertexter.",
  "Feedback und Kontakt": "Synpunkter och kontakt",
  "Solltest du auf Barrieren stossen oder Anmerkungen zur Barrierefreiheit unserer Website haben, kannst du uns gerne kontaktieren:": "Om du stöter på hinder eller har synpunkter på tillgängligheten på vår webbplats är du välkommen att kontakta oss:",
  "E-Mail: <a href=\"mailto:info@strongnoodles.ch\">info@strongnoodles.ch</a>": "E-post: <a href=\"mailto:info@strongnoodles.ch\">info@strongnoodles.ch</a>",

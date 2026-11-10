@@ -154,7 +154,7 @@ window.SN_I18N.tr = {
  "Semantisches HTML5 zur Unterstützung von Screenreadern.": "Ekran okuyucuları desteklemek için semantik HTML5.",
  "Berücksichtigung von reduzierten Bewegungseinstellungen (<code translate=\"no\">prefers-reduced-motion</code>) bei Animationen.": "Animasyonlarda <code translate=\"no\">prefers-reduced-motion</code> (azaltılmış hareket ayarları) dikkate alınması.",
  "Die Website funktioniert auch ohne JavaScript mit einem Hinweistext und allen Inhalten sichtbar.": "Web sitesi, JavaScript olmadan da bir uyarı metni ve tüm içeriklerin görünür olduğu şekilde çalışır.",
- "Das Werbevideo auf der Startseite enthält nur Hintergrundmusik ohne gesprochenen Text; es sind daher keine Untertitel erforderlich.": "Ana sayfadaki tanıtım videosunda sadece fon müziği yer almakta olup sesli metin bulunmamaktadır; bu nedenle altyazıya gerek yoktur.",
+ "Das Werbevideo auf der Startseite hat keinen Ton. Alle Inhalte werden als Text im Bild gezeigt; es sind daher keine Untertitel erforderlich.": "Ana sayfadaki tanıtım videosunda ses yoktur. Tüm içerik ekranda metin olarak gösterilir; bu nedenle altyazıya gerek yoktur.",
  "Feedback und Kontakt": "Geri Bildirim ve İletişim",
  "Solltest du auf Barrieren stossen oder Anmerkungen zur Barrierefreiheit unserer Website haben, kannst du uns gerne kontaktieren:": "Herhangi bir erişilebilirlik engeliyle karşılaşırsanız veya web sitemizin erişilebilirliği hakkında görüşleriniz varsa, lütfen bizimle iletişime geçebilirsiniz:",
  "E-Mail: <a href=\"mailto:info@strongnoodles.ch\">info@strongnoodles.ch</a>": "E-posta: <a href=\"mailto:info@strongnoodles.ch\">info@strongnoodles.ch</a>",

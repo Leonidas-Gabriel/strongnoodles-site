@@ -199,7 +199,7 @@
   "Semantisches HTML5 zur Unterstützung von Screenreadern.",
   "Berücksichtigung von reduzierten Bewegungseinstellungen (<code translate=\"no\">prefers-reduced-motion</code>) bei Animationen.",
   "Die Website funktioniert auch ohne JavaScript mit einem Hinweistext und allen Inhalten sichtbar.",
-  "Das Werbevideo auf der Startseite enthält nur Hintergrundmusik ohne gesprochenen Text; es sind daher keine Untertitel erforderlich.",
+  "Das Werbevideo auf der Startseite hat keinen Ton. Alle Inhalte werden als Text im Bild gezeigt; es sind daher keine Untertitel erforderlich.",
   "Feedback und Kontakt",
   "Solltest du auf Barrieren stossen oder Anmerkungen zur Barrierefreiheit unserer Website haben, kannst du uns gerne kontaktieren:",
   "E-Mail: <a href=\"mailto:info@strongnoodles.ch\">info@strongnoodles.ch</a>",
