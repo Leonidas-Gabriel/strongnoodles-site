@@ -1589,6 +1589,24 @@
   @media (max-width: 560px) {
     .story-visual { margin-inline: -20px; padding-inline: 20px; }
   }
+
+  /* Handy: nichts darf seitlich überstehen (sonst wackelt die Seite beim Wischen) */
+  html { overflow-x: clip; }
+
+  @media (max-width: 860px) {
+    /* Packung kleiner, damit unter ihr genug Platz für den Text bleibt */
+    .story-visual { height: 42vh; min-height: 280px; padding-top: 3.6rem; padding-bottom: 2rem; }
+    .story-step { min-height: 52vh; padding-top: 1.6rem; }
+    /* Etiketten auseinanderziehen, damit sie sich nicht überlappen */
+    .pack-labels li[data-label="1"] { --y: 84% !important; }
+    .pack-labels li[data-label="2"] { --y: 66% !important; }
+    .pack-labels li[data-label="3"] { --y: 48% !important; }
+    .pack-labels li[data-label="4"] { --y: 30% !important; }
+    /* Klick-Button kleiner und dezenter, damit er weniger Text verdeckt */
+    .clicker-btn { right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding: 0.3rem; opacity: 0.6; box-shadow: 2px 2px 0 var(--ink-fixed); }
+    .clicker-count { font-size: 0.8rem; min-width: 1.4em; }
+    footer { padding-bottom: 4.5rem; }
+  }
   @media (max-width: 420px) {
     .pack-labels li { font-size: 0.64rem; padding: 0.15rem 0.4rem; }
     .pack-wrap { margin-right: 5.6rem; }
