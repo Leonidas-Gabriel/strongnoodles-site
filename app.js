@@ -23,7 +23,7 @@
     tr: { locale: 'tr-TR' }
   };
   const LANG_KEY = 'snLang';
-  const I18N_VERSION = '8';
+  const I18N_VERSION = '9';
   const I18N_ATTRS = ['aria-label', 'placeholder', 'title', 'alt', 'data-mail-text'];
   const LETTER = /\p{L}/u;
   let currentLang = 'de';
@@ -696,40 +696,8 @@
   if (window.location.hash === '#reviews') { loadReviews(); }
   document.addEventListener('langchange', () => { renderAdminState(); if (reviewsLoaded) { renderSummary(); renderReviews(); } });
 
-  // ---------- Pasta-Clicker ----------
-  const clickerBtn = document.getElementById('clickerBtn');
-  const clickerCount = document.getElementById('clickerCount');
-  let clickerPoints = 0;
-
-  try {
-    // frühere Version hat den Stand unter 'adhsPoints' gespeichert
-    clickerPoints = parseInt(localStorage.getItem('clickerPoints') || localStorage.getItem('adhsPoints'), 10) || 0;
-  } catch (err) { clickerPoints = 0; }
-
-  function renderClicker() {
-    clickerCount.textContent = clickerPoints.toLocaleString(loc());
-    clickerBtn.setAttribute('aria-label', t('Pasta-Clicker, Punkte: {n}').replace('{n}', clickerPoints));
-  }
-  renderClicker();
-  document.addEventListener('langchange', renderClicker);
-
-  clickerBtn.addEventListener('click', () => {
-    clickerPoints += 1;
-    renderClicker();
-    try { localStorage.setItem('clickerPoints', String(clickerPoints)); } catch (err) { /* ignorieren */ }
-    if (!reduceMotion.matches) {
-      clickerBtn.classList.add('pop');
-      setTimeout(() => clickerBtn.classList.remove('pop'), 90);
-      const plus = document.createElement('span');
-      plus.className = 'clicker-plus';
-      plus.setAttribute('aria-hidden', 'true');
-      plus.textContent = clickerPoints % 10 === 0 ? t('Weiter so!') : '+1';
-      plus.style.left = (15 + Math.random() * 55) + '%';
-      plus.addEventListener('animationend', () => plus.remove());
-      clickerBtn.appendChild(plus);
-      if (clickerPoints % 10 === 0) { const r = clickerBtn.getBoundingClientRect(); burst(r.left + r.width / 2, r.top); }
-    }
-  });
+  // Pasta-Clicker wurde entfernt: alten Punktestand aus dem Browser löschen
+  try { localStorage.removeItem('clickerPoints'); localStorage.removeItem('adhsPoints'); } catch (err) { /* ignorieren */ }
 
   // ---------- Mega-Pepp ----------
   function burst(x, y) {
