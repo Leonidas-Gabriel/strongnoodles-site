@@ -120,6 +120,8 @@ function handleOrder_(data) {
     sheet.getRange(row, COL.paid, 1, 2).setValues([['Nein', 'Neu']]);
     sheet.getRange(row, COL.note).setValue(order.note);
     sheet.getRange(row, COL.tariff).setValue(tariff);
+    // E-Mail anklickbar machen (von Hand getippte Adressen verlinkt Sheets selbst, per Script geschriebene nicht).
+    sheet.getRange(row, COL.email).setRichTextValue(mailLink_(order.email));
     SpreadsheetApp.flush();
   } catch (err) {
     console.error(err);
@@ -230,6 +232,12 @@ function handleSale_(data) {
   }
 
   return json_({ ok: true, orderNo: orderNo, row: row, tariff: tariff, todayPacks: todayPacks });
+}
+
+// E-Mail-Adresse als Link (mailto:) für eine Sheet-Zelle.
+function mailLink_(email) {
+  const address = String(email).replace(/^'/, '');
+  return SpreadsheetApp.newRichTextValue().setText(email).setLinkUrl('mailto:' + address).build();
 }
 
 // Gibt null zurück, wenn die PIN stimmt, sonst die Fehlermeldung. Zählt Fehlversuche (CacheService).
