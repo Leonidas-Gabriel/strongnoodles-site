@@ -233,10 +233,15 @@
     mainEl.focus({ preventScroll: false });
   });
 
+  // #verkauf = Bestellseite im Direktverkauf-Modus (nur intern, mit Admin-PIN)
   function handleRoute(event) {
     const hash = window.location.hash.replace('#', '');
-    const id = validPages.includes(hash) ? hash : 'home';
+    const saleMode = hash === 'verkauf';
+    const id = saleMode ? 'order' : (validPages.includes(hash) ? hash : 'home');
+    document.getElementById('order').classList.toggle('sale-mode', saleMode);
+    document.getElementById('salePanel').hidden = !saleMode;
     showPage(id, Boolean(event));
+    if (saleMode) { document.title = 'Direktverkauf – Strongnoodles'; }
   }
 
   window.addEventListener('hashchange', handleRoute);
@@ -451,6 +456,118 @@
       okText: t('Danke für deine Bestellung! Wir melden uns mit den Lieferdetails und den TWINT-Infos.')
     }).then(() => { updateTotal(); });
   });
+
+  // ---------- Direktverkauf (strongnoodles.ch/#verkauf) ----------
+  // Die PIN prüft die Web-App (Skripteigenschaft ADMIN_PIN), sie steht nirgends im Website-Code.
+  // Auf dem Gerät gemerkt werden nur PIN (bis "Abmelden") und der Name der verkaufenden Person.
+  const SALE_PIN_KEY = 'snSalePin';
+  const SALE_SELLER_KEY = 'snSaleSeller';
+  const saleLogin = document.getElementById('saleLogin');
+  const saleForm = document.getElementById('saleForm');
+  const saleQty = document.getElementById('saleQty');
+  const saleTotal = document.getElementById('saleTotal');
+  const saleToday = document.getElementById('saleToday');
+  const saleAlert = document.getElementById('saleAlert');
+  const saleLoginAlert = document.getElementById('saleLoginAlert');
+  const saleSeller = document.getElementById('saleSeller');
+  const store = {
+    get: (k) => { try { return localStorage.getItem(k) || ''; } catch (err) { return ''; } },
+    set: (k, v) => { try { if (v) { localStorage.setItem(k, v); } else { localStorage.removeItem(k); } } catch (err) { /* ignorieren */ } }
+  };
+  let salePin = store.get(SALE_PIN_KEY);
+  saleSeller.value = store.get(SALE_SELLER_KEY);
+
+  async function saleRequest(data) {
+    const res = await fetch(WEBAPP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ token: WEBAPP_TOKEN, pin: salePin, ...data })
+    });
+    if (!res.ok) { throw new Error('HTTP ' + res.status); }
+    return res.json();
+  }
+  function saleQtyValue() { return Math.min(99, Math.max(1, parseInt(saleQty.value, 10) || 1)); }
+  function updateSaleTotal() { saleTotal.textContent = formatChf(saleQtyValue() * PRICE_CENTS); }
+  function showSaleForm(loggedIn) {
+    saleLogin.hidden = loggedIn;
+    saleForm.hidden = !loggedIn;
+    if (loggedIn && !saleSeller.value) { saleSeller.focus(); }
+  }
+  function saleLogout(message) {
+    salePin = '';
+    store.set(SALE_PIN_KEY, '');
+    showSaleForm(false);
+    if (message) { showAlert(saleLoginAlert, message, true); }
+  }
+
+  saleQty.addEventListener('input', updateSaleTotal);
+  document.getElementById('saleMinus').addEventListener('click', () => { saleQty.value = Math.max(1, saleQtyValue() - 1); updateSaleTotal(); });
+  document.getElementById('salePlus').addEventListener('click', () => { saleQty.value = Math.min(99, saleQtyValue() + 1); updateSaleTotal(); });
+  document.getElementById('saleLogout').addEventListener('click', () => saleLogout(''));
+  updateSaleTotal();
+
+  saleLogin.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = saleLogin.querySelector('button[type=submit]');
+    salePin = document.getElementById('salePin').value.trim();
+    btn.disabled = true;
+    try {
+      const result = await saleRequest({ type: 'sale-auth' });
+      if (!result.ok) { throw new Error(result.error || 'Fehler'); }
+      store.set(SALE_PIN_KEY, salePin);
+      saleToday.textContent = result.todayPacks || 0;
+      saleLoginAlert.style.display = 'none';
+      saleLogin.reset();
+      showSaleForm(true);
+    } catch (err) {
+      salePin = '';
+      showAlert(saleLoginAlert, 'Anmelden hat nicht geklappt: ' + err.message, true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  saleForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = saleForm.querySelector('button[type=submit]');
+    const qty = saleQtyValue();
+    const payment = saleForm.querySelector('input[name=salePayment]:checked').value;
+    const seller = saleSeller.value.trim();
+    store.set(SALE_SELLER_KEY, seller);
+    btn.disabled = true;
+    try {
+      const result = await saleRequest({
+        type: 'sale', qty, payment, seller,
+        paid: document.getElementById('salePaid').checked,
+        name: document.getElementById('saleName').value.trim(),
+        note: document.getElementById('saleNote').value.trim()
+      });
+      if (!result.ok) {
+        if (result.auth) { saleLogout(result.error); return; }
+        throw new Error(result.error || 'Fehler');
+      }
+      saleToday.textContent = result.todayPacks || 0;
+      showAlert(saleAlert, `Erfasst: ${result.orderNo}, ${qty} Packung${qty === 1 ? '' : 'en'}, ${payment}${result.tariff ? ', Tarif ' + result.tariff : ''}.`, false);
+      const r = btn.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top);
+      // Für den nächsten Verkauf: Menge, Name und Bemerkung leeren, Verkäufer:in und Zahlungsart bleiben.
+      saleQty.value = 1;
+      document.getElementById('saleName').value = '';
+      document.getElementById('saleNote').value = '';
+      document.getElementById('salePaid').checked = true;
+      updateSaleTotal();
+    } catch (err) {
+      showAlert(saleAlert, 'Nicht erfasst: ' + err.message + '. Bitte nochmals versuchen.', true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+  showSaleForm(Boolean(salePin));
+  if (salePin && window.location.hash === '#verkauf') {
+    saleRequest({ type: 'sale-auth' }).then((r) => {
+      if (r.ok) { saleToday.textContent = r.todayPacks || 0; } else if (r.auth) { saleLogout(r.error); }
+    }).catch(() => { /* offline: Formular bleibt nutzbar */ });
+  }
 
   // ---------- Bewertungen (Supabase) ----------
   // Einrichtung: siehe SETUP-BEWERTUNGEN.md. Der anon-Key ist öffentlich gedacht, den Schutz übernehmen die

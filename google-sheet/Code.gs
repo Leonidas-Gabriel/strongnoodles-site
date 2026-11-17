@@ -2,6 +2,8 @@
  * Strongnoodles: Formulare von strongnoodles.ch.
  *  - Bestellungen (type "order"): neue Zeile im Blatt "Bestellungen" + Benachrichtigungs-Mail an uns.
  *  - Kontaktnachrichten (type "contact"): nur Mail an uns, nichts im Sheet.
+ *  - Direktverkäufe (type "sale", Seite strongnoodles.ch/#verkauf): neue Zeile im Blatt "Bestellungen",
+ *    schon bezahlt und übergeben. Nur mit Admin-PIN (Skripteigenschaft ADMIN_PIN, steht NICHT im Code).
  *
  * Gehört ins Apps-Script-Projekt des Kundenregisters (Erweiterungen → Apps Script).
  * Einrichtung und Tests: siehe SETUP-BESTELLUNGEN-SHEET.md im Website-Repo.
@@ -25,7 +27,15 @@ const MAX_LEN = { name: 100, email: 254, street: 150, zip: 10, city: 80, note: 1
 const MAX_QTY = 999;
 
 // Spalten (1 = A)
-const COL = { date: 1, orderNo: 2, name: 3, email: 4, street: 5, zip: 6, city: 7, qty: 8, paid: 10, status: 11, note: 14, tariff: 15 };
+const COL = { date: 1, orderNo: 2, name: 3, email: 4, street: 5, zip: 6, city: 7, qty: 8, paid: 10, status: 11, delivered: 12, owner: 13, note: 14, tariff: 15 };
+
+// Direktverkauf: Admin-PIN liegt in den Skripteigenschaften (Projekteinstellungen → Skripteigenschaften →
+// ADMIN_PIN). Nach MAX_PIN_TRIES falschen Versuchen ist der Direktverkauf PIN_LOCK_SECONDS lang gesperrt.
+const SALE_PREFIX = 'Direktverkauf';
+const SALE_PAYMENTS = ['TWINT', 'Bar'];
+const MAX_SALE_LEN = { name: 100, seller: 40, note: 500 };
+const MAX_PIN_TRIES = 8;
+const PIN_LOCK_SECONDS = 15 * 60;
 
 // Tarife: Jede Bestellung bekommt in Spalte O den Tarif, der beim Bestellen aktiv war. Spalte I rechnet
 // Anzahl × Preis dieses Tarifs (Tabelle in "Einstellungen" E3:F12). So ändern sich alte Bestellungen nicht,
@@ -51,6 +61,9 @@ function doPost(e) {
 
   if (data.type === 'contact') {
     return handleContact_(data);
+  }
+  if (data.type === 'sale' || data.type === 'sale-auth') {
+    return handleSale_(data);
   }
   // Alles andere (auch ohne type, wie bei älteren Versionen der Website) ist eine Bestellung.
   return handleOrder_(data);
@@ -92,23 +105,13 @@ function handleOrder_(data) {
       return json_({ ok: false, error: 'Blatt "' + SHEET_NAME + '" nicht gefunden' });
     }
 
-    // Spalte B lesen: erste leere Zeile finden und höchste vorhandene Bestell-Nr. bestimmen.
-    const numbers = sheet.getRange(FIRST_ROW, COL.orderNo, LAST_ROW - FIRST_ROW + 1, 1).getDisplayValues();
-    let maxNo = 0;
-    numbers.forEach(function (r, i) {
-      const value = String(r[0]).trim();
-      if (!value && !row) { row = FIRST_ROW + i; }
-      const m = value.match(/^SN-(\d+)$/i);
-      if (m) { maxNo = Math.max(maxNo, parseInt(m[1], 10)); }
-    });
-    if (!row) {
+    const slot = nextSlot_(sheet);
+    if (!slot) {
       return json_({ ok: false, error: 'Keine freie Zeile mehr (Zeilen ' + FIRST_ROW + ' bis ' + LAST_ROW + ' voll)' });
     }
-    orderNo = ORDER_PREFIX + String(maxNo + 1).padStart(3, '0');
-
-    // Aktiven Tarif lesen. Fehlt er, bleibt O leer und Spalte I zeigt "Tarif?", die Bestellung geht trotzdem durch.
-    const settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SETTINGS_SHEET);
-    tariff = settings ? clean_(settings.getRange(ACTIVE_TARIFF_CELL).getDisplayValue(), 50) : '';
+    row = slot.row;
+    orderNo = slot.orderNo;
+    tariff = activeTariff_();
 
     // Gezielt schreiben: A bis H, J bis K, N und O. Spalte I (Formel), L und M bleiben unangetastet.
     sheet.getRange(row, COL.date, 1, 8).setValues([[
@@ -146,6 +149,116 @@ function handleOrder_(data) {
   }
 
   return json_({ ok: true, orderNo: orderNo, row: row });
+}
+
+// Spalte B lesen: erste leere Zeile finden und nächste Bestell-Nr. bestimmen. Nur innerhalb des Locks aufrufen.
+function nextSlot_(sheet) {
+  const numbers = sheet.getRange(FIRST_ROW, COL.orderNo, LAST_ROW - FIRST_ROW + 1, 1).getDisplayValues();
+  let row = 0;
+  let maxNo = 0;
+  numbers.forEach(function (r, i) {
+    const value = String(r[0]).trim();
+    if (!value && !row) { row = FIRST_ROW + i; }
+    const m = value.match(/^SN-(\d+)$/i);
+    if (m) { maxNo = Math.max(maxNo, parseInt(m[1], 10)); }
+  });
+  return row ? { row: row, orderNo: ORDER_PREFIX + String(maxNo + 1).padStart(3, '0') } : null;
+}
+
+// Aktiven Tarif lesen. Fehlt er, bleibt O leer und Spalte I zeigt "Tarif?", die Zeile wird trotzdem geschrieben.
+function activeTariff_() {
+  const settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SETTINGS_SHEET);
+  return settings ? clean_(settings.getRange(ACTIVE_TARIFF_CELL).getDisplayValue(), 50) : '';
+}
+
+// ---------- Direktverkauf (Stand, Schule, Markt) ----------
+function handleSale_(data) {
+  const auth = checkPin_(data.pin);
+  if (auth) { return json_({ ok: false, error: auth, auth: true }); }
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  if (!sheet) { return json_({ ok: false, error: 'Blatt "' + SHEET_NAME + '" nicht gefunden' }); }
+
+  // Nur PIN prüfen (Anmelden auf der Website), nichts schreiben.
+  if (data.type === 'sale-auth') {
+    return json_({ ok: true, todayPacks: todaySalePacks_(sheet), tariff: activeTariff_() });
+  }
+
+  const qtyText = String(data.qty == null ? '' : data.qty).trim();
+  if (!/^\d+$/.test(qtyText) || Number(qtyText) < 1 || Number(qtyText) > MAX_QTY) {
+    return json_({ ok: false, error: 'Anzahl muss eine ganze Zahl zwischen 1 und ' + MAX_QTY + ' sein' });
+  }
+  const qty = Number(qtyText);
+  const payment = SALE_PAYMENTS.indexOf(data.payment) >= 0 ? data.payment : '';
+  if (!payment) { return json_({ ok: false, error: 'Zahlungsart fehlt' }); }
+  const paid = data.paid !== false;
+  const seller = clean_(data.seller, MAX_SALE_LEN.seller);
+  const name = clean_(data.name, MAX_SALE_LEN.name);
+  const extra = clip_(data.note, MAX_SALE_LEN.note);
+  const note = clean_(SALE_PREFIX + ', ' + payment + (extra ? ', ' + extra : ''), MAX_LEN.note);
+
+  let row = 0;
+  let orderNo = '';
+  let tariff = '';
+  let todayPacks = 0;
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) {
+    return json_({ ok: false, error: 'Sheet ist gerade beschäftigt, bitte nochmals versuchen' });
+  }
+  try {
+    const slot = nextSlot_(sheet);
+    if (!slot) {
+      return json_({ ok: false, error: 'Keine freie Zeile mehr (Zeilen ' + FIRST_ROW + ' bis ' + LAST_ROW + ' voll)' });
+    }
+    row = slot.row;
+    orderNo = slot.orderNo;
+    tariff = activeTariff_();
+    const now = new Date();
+
+    // Wie bei Bestellungen: Spalte I (Formel) bleibt unangetastet. Keine Adresse, schon übergeben.
+    sheet.getRange(row, COL.date, 1, 8).setValues([[now, orderNo, name || SALE_PREFIX, '', '', '', '', qty]]);
+    sheet.getRange(row, COL.paid, 1, 5).setValues([[paid ? 'Ja' : 'Nein', 'Geliefert', now, seller, note]]);
+    sheet.getRange(row, COL.delivered).setNumberFormat('dd.mm.yyyy');
+    sheet.getRange(row, COL.tariff).setValue(tariff);
+    SpreadsheetApp.flush();
+    todayPacks = todaySalePacks_(sheet);
+  } catch (err) {
+    console.error(err);
+    return json_({ ok: false, error: 'Interner Fehler' });
+  } finally {
+    lock.releaseLock();
+  }
+
+  return json_({ ok: true, orderNo: orderNo, row: row, tariff: tariff, todayPacks: todayPacks });
+}
+
+// Gibt null zurück, wenn die PIN stimmt, sonst die Fehlermeldung. Zählt Fehlversuche (CacheService).
+function checkPin_(pin) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PIN');
+  if (!expected) { return 'Admin-PIN ist noch nicht eingerichtet (Skripteigenschaft ADMIN_PIN)'; }
+  const cache = CacheService.getScriptCache();
+  const tries = parseInt(cache.get('pinFails') || '0', 10);
+  if (tries >= MAX_PIN_TRIES) { return 'Zu viele falsche Versuche, bitte in 15 Minuten nochmals'; }
+  if (String(pin == null ? '' : pin) !== expected) {
+    cache.put('pinFails', String(tries + 1), PIN_LOCK_SECONDS);
+    return 'PIN falsch';
+  }
+  return null;
+}
+
+// Summe der heute direkt verkauften Packungen (Datum heute und Bemerkung beginnt mit "Direktverkauf").
+function todaySalePacks_(sheet) {
+  const values = sheet.getRange(FIRST_ROW, 1, LAST_ROW - FIRST_ROW + 1, COL.note).getValues();
+  const tz = Session.getScriptTimeZone();
+  const today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+  let sum = 0;
+  values.forEach(function (r) {
+    const d = r[COL.date - 1];
+    if (!(d instanceof Date) || Utilities.formatDate(d, tz, 'yyyy-MM-dd') !== today) { return; }
+    if (String(r[COL.note - 1]).indexOf(SALE_PREFIX) !== 0) { return; }
+    sum += Number(r[COL.qty - 1]) || 0;
+  });
+  return sum;
 }
 
 function handleContact_(data) {
@@ -201,7 +314,7 @@ function clean_(value, maxLen) {
 
 // Fehler zusätzlich protokollieren, damit sie unter "Ausführungen" im Apps-Script-Editor sichtbar sind.
 function json_(obj) {
-  if (!obj.ok) { console.warn('Bestellung abgelehnt: ' + obj.error); }
+  if (!obj.ok) { console.warn('Anfrage abgelehnt: ' + obj.error); }
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -213,6 +326,21 @@ function testDoPost() {
       contents: JSON.stringify({
         token: TOKEN, name: 'Test Person', email: 'test@example.com', street: 'Teststrasse 1',
         zip: '6300', city: 'Zug', qty: 2, note: '=Test gegen Formel-Injection'
+      })
+    }
+  });
+  console.log(res.getContent());
+}
+
+// Zum Testen im Editor. Erfasst einen echten Test-Direktverkauf (danach Zeile von Hand löschen).
+// Vorher ADMIN_PIN in den Skripteigenschaften setzen.
+function testSale() {
+  const res = doPost({
+    postData: {
+      type: 'text/plain',
+      contents: JSON.stringify({
+        token: TOKEN, type: 'sale', pin: PropertiesService.getScriptProperties().getProperty('ADMIN_PIN'),
+        qty: 2, payment: 'Bar', paid: true, seller: 'Test', name: '', note: 'Testverkauf'
       })
     }
   });

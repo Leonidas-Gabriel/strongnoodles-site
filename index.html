@@ -62,7 +62,7 @@
 
 <link rel="preload" as="image" href="images/logo.webp" type="image/webp">
 <link rel="preload" as="font" type="font/woff2" href="fonts/anton-latin.woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=18">
+<link rel="stylesheet" href="styles.css?v=19">
 <noscript><style>.page{display:block !important;margin-bottom:48px}.nav-toggle{display:none}</style></noscript>
 </head>
 <body>
@@ -489,6 +489,60 @@
 
   <!-- ORDER -->
   <section class="page" id="order" tabindex="-1">
+    <!-- Direktverkauf (nur intern): strongnoodles.ch/#verkauf, mit Admin-PIN. Wird nicht übersetzt. -->
+    <div class="sale-panel" id="salePanel" hidden data-i18n-skip lang="de">
+      <div class="section-head">
+        <div class="eyebrow">Intern</div>
+        <h1>Direktverkauf</h1>
+        <p>Für Verkäufe am Stand, in der Schule oder an der Haustür. Jeder Verkauf landet sofort als eigene Zeile in der Bestellliste, schon als übergeben markiert.</p>
+      </div>
+
+      <form id="saleLogin" class="sale-card">
+        <div class="field">
+          <label for="salePin">Admin-PIN</label>
+          <input type="password" id="salePin" autocomplete="current-password" inputmode="numeric" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Anmelden</button>
+        <div class="form-alert" id="saleLoginAlert" role="status" aria-live="polite"></div>
+      </form>
+
+      <form id="saleForm" class="sale-card" hidden>
+        <div class="sale-today" aria-live="polite">Heute direkt verkauft: <b id="saleToday">0</b> Packungen</div>
+        <div class="field">
+          <label for="saleSeller">Verkauft von</label>
+          <input type="text" id="saleSeller" maxlength="40" autocomplete="nickname" required>
+        </div>
+        <div class="field">
+          <label for="saleQty">Anzahl Packungen</label>
+          <div class="qty-row sale-qty">
+            <button type="button" class="qty-btn" id="saleMinus" aria-label="Eine Packung weniger">&minus;</button>
+            <input type="number" id="saleQty" min="1" max="99" step="1" value="1" inputmode="numeric" required>
+            <button type="button" class="qty-btn" id="salePlus" aria-label="Eine Packung mehr">+</button>
+          </div>
+        </div>
+        <fieldset class="field sale-pay">
+          <legend>Zahlung</legend>
+          <label><input type="radio" name="salePayment" value="TWINT" checked> TWINT</label>
+          <label><input type="radio" name="salePayment" value="Bar"> Bar</label>
+        </fieldset>
+        <label class="sale-check"><input type="checkbox" id="salePaid" checked> Schon bezahlt</label>
+        <div class="order-total">
+          <div class="total-line"><span>Betrag</span><span id="saleTotal" translate="no">CHF 9.00</span></div>
+        </div>
+        <div class="field">
+          <label for="saleName">Name Kund:in (optional)</label>
+          <input type="text" id="saleName" maxlength="100" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="saleNote">Bemerkung (optional)</label>
+          <input type="text" id="saleNote" maxlength="500" autocomplete="off">
+        </div>
+        <button type="submit" class="btn btn-primary">Verkauf erfassen</button>
+        <div class="form-alert" id="saleAlert" role="status" aria-live="polite"></div>
+        <button type="button" class="sale-logout" id="saleLogout">Abmelden</button>
+      </form>
+    </div>
+
     <div class="section-head">
       <div class="eyebrow">Bestellen</div>
       <h1>Hol dir deine Strongnoodles.</h1>
@@ -797,7 +851,7 @@
   </div>
 </footer>
 
-<script src="app.js?v=26" defer></script>
+<script src="app.js?v=27" defer></script>
 
 </body>
 </html>

@@ -88,6 +88,24 @@ Preis ändern: **nicht** den Preis eines bestehenden Tarifs überschreiben, sond
 Tarifnamen anlegen und H3 darauf umstellen. Nur wenn ein Tarif noch keinen Preis hat (z. B. «Normal» vor dem
 Festlegen), einfach den Preis eintragen: dann rechnen alle Bestellungen mit diesem Tarif automatisch.
 
+## Direktverkauf (strongnoodles.ch/#verkauf)
+
+Für Verkäufe von Hand zu Hand (Stand, Schule, Haustür). Die Seite ist nirgends verlinkt und nur mit Admin-PIN nutzbar.
+Jeder Verkauf wird eine eigene Zeile in «Bestellungen»: normale SN-Nummer, Name «Direktverkauf» (oder der Name der
+Kundin), keine Adresse, Status «Geliefert», Geliefert am = heute, Zuständig = wer verkauft hat, Bemerkung
+«Direktverkauf, TWINT» bzw. «Direktverkauf, Bar», Tarif = aktiver Tarif aus «Einstellungen» H3.
+
+Einrichten (einmalig):
+1. Apps-Script-Editor → links **Projekteinstellungen** (Zahnrad) → ganz unten **Skripteigenschaften** →
+   **Skripteigenschaft hinzufügen**: Name `ADMIN_PIN`, Wert eine PIN eurer Wahl (mind. 6 Ziffern). Speichern.
+   Die PIN steht damit nur bei Google, nie im Code oder im Repo (das ist öffentlich).
+2. Neue Code.gs einfügen und eine **neue Version bereitstellen** (Abschnitt 4).
+3. Optional im Editor `testSale` ausführen: schreibt einen Testverkauf, danach die Zeile wieder löschen.
+
+Benutzen: Auf dem Handy strongnoodles.ch/#verkauf öffnen (am besten als Lesezeichen oder auf den Home-Bildschirm),
+PIN eingeben. Das Handy bleibt angemeldet, bis jemand «Abmelden» tippt. PIN ändern = Skripteigenschaft ändern,
+dann sind alle Geräte automatisch abgemeldet. Nach 8 falschen PINs ist der Direktverkauf 15 Minuten gesperrt.
+
 ## 5. Testplan
 
 ### a) Script direkt testen

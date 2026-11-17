@@ -1563,3 +1563,23 @@
     .faq-item summary::after { transition: none; }
     .faq-item::details-content { transition: none; }
   }
+
+/* ---------- DIREKTVERKAUF (#verkauf) ---------- */
+#order.sale-mode > .section-head,
+#order.sale-mode > .contact-grid { display: none; }
+.sale-panel { max-width: 560px; }
+.sale-card { background: var(--paper); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--durum); padding: 1.6rem; margin-bottom: 2rem; }
+.sale-card[hidden] { display: none; }
+.sale-today { background: var(--ink); color: var(--durum); font-weight: 800; padding: 0.6rem 0.9rem; margin-bottom: 1.4rem; }
+.sale-today b { font-size: 1.3rem; }
+.sale-qty { max-width: none; }
+.sale-qty .qty-btn { min-width: 64px; font-size: 1.6rem; }
+.sale-qty input { font-size: 1.5rem; }
+.sale-pay { border: 0; padding: 0; margin: 0 0 1rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.sale-pay legend { font-weight: 700; margin-bottom: 0.4rem; padding: 0; }
+.sale-pay label { flex: 1 1 120px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border: 2.5px solid var(--ink); padding: 0.8rem; font-weight: 800; cursor: pointer; }
+.sale-pay label:has(input:checked) { background: var(--durum); color: var(--ink-fixed); box-shadow: 3px 3px 0 var(--ink); }
+.sale-check { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; margin-bottom: 1rem; cursor: pointer; }
+.sale-check input { width: 1.3rem; height: 1.3rem; accent-color: var(--tomato); }
+.sale-card .btn-primary { width: 100%; justify-content: center; }
+.sale-logout { margin-top: 1.2rem; background: none; border: 0; padding: 0; color: var(--ink-soft); text-decoration: underline; cursor: pointer; font: inherit; }
